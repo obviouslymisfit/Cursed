@@ -9,6 +9,11 @@ import net.minecraft.server.MinecraftServer;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
 
+import java.util.UUID;
+
+import obviouslymisfit.cursed.state.RunLifecycleState;
+
+
 public final class CursedCommands {
 
     private CursedCommands() {}
@@ -17,6 +22,37 @@ public final class CursedCommands {
         dispatcher.register(
                 Commands.literal("curse")
                         .requires(src -> src.hasPermission(2))
+                        .then(Commands.literal("start")
+                                .executes(ctx -> {
+                                    CommandSourceStack src = ctx.getSource();
+                                    MinecraftServer server = src.getServer();
+
+                                    GameState state = StateStorage.get(server);
+
+                                    if (state.lifecycleState != RunLifecycleState.IDLE) {
+                                        src.sendFailure(Component.literal(
+                                                "CURSED is already running or paused. Use /curse status."
+                                        ));
+                                        return 0;
+                                    }
+
+                                    state.runId = UUID.randomUUID();
+                                    state.lifecycleState = RunLifecycleState.RUNNING;
+                                    state.phase = 1;
+                                    state.episodeNumber = 1;
+
+                                    StateStorage.save(server, state);
+
+                                    src.sendSuccess(() -> Component.literal(
+                                            "CURSED run started\n" +
+                                                    "- runId: " + state.runId + "\n" +
+                                                    "- phase: 1\n" +
+                                                    "- episode: 1"
+                                    ), true);
+
+                                    return 1;
+                                }))
+
                         .then(Commands.literal("status")
                                 .executes(ctx -> {
                                     CommandSourceStack src = ctx.getSource();
