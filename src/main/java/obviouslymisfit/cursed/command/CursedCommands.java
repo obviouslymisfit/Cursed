@@ -53,6 +53,31 @@ public final class CursedCommands {
                                     return 1;
                                 }))
 
+                        .then(Commands.literal("episode")
+                                .then(Commands.literal("end")
+                                        .executes(ctx -> {
+                                            CommandSourceStack src = ctx.getSource();
+                                            MinecraftServer server = src.getServer();
+
+                                            GameState state = StateStorage.get(server);
+
+                                            if (state.lifecycleState != RunLifecycleState.RUNNING) {
+                                                src.sendFailure(Component.literal(
+                                                        "CURSED is not running. Cannot end episode."
+                                                ));
+                                                return 0;
+                                            }
+
+                                            state.lifecycleState = RunLifecycleState.PAUSED;
+                                            StateStorage.save(server, state);
+
+                                            src.sendSuccess(() -> Component.literal(
+                                                    "CURSED episode ended. State is now PAUSED."
+                                            ), true);
+
+                                            return 1;
+                                        })))
+
                         .then(Commands.literal("status")
                                 .executes(ctx -> {
                                     CommandSourceStack src = ctx.getSource();
