@@ -169,8 +169,6 @@ public final class CursedCommands {
                             return 1;
                         })));
 
-        root.then(teams);
-
         // /curse team assign <player> <team>
         var team = Commands.literal("team");
 
@@ -209,9 +207,51 @@ public final class CursedCommands {
 
                                     return 1;
                                 }))));
+        team.then(Commands.literal("unassign")
+                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                        .executes(ctx -> {
+                            CommandSourceStack src = ctx.getSource();
+                            MinecraftServer server = src.getServer();
+
+                            GameState state = StateStorage.get(server);
+
+                            ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+
+                            Integer removed = state.playerTeams.remove(target.getUUID());
+                            StateStorage.save(server, state);
+
+                            if (removed == null) {
+                                src.sendSuccess(() -> Component.literal(
+                                        target.getName().getString() + " was not assigned to any team."
+                                ), true);
+                            } else {
+                                src.sendSuccess(() -> Component.literal(
+                                        "Unassigned " + target.getName().getString() + " from team " + removed
+                                ), true);
+                            }
+
+                            return 1;
+                        })));
+        teams.then(Commands.literal("clear")
+                .executes(ctx -> {
+                    CommandSourceStack src = ctx.getSource();
+                    MinecraftServer server = src.getServer();
+
+                    GameState state = StateStorage.get(server);
+
+                    int cleared = state.playerTeams.size();
+                    state.playerTeams.clear();
+                    StateStorage.save(server, state);
+
+                    src.sendSuccess(() -> Component.literal(
+                            "Cleared " + cleared + " team assignment(s)."
+                    ), true);
+
+                    return 1;
+                }));
+        root.then(teams);
 
         root.then(team);
-
 
         // /curse status
         root.then(Commands.literal("status")
