@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "phase": 1,
+  "primary": {
+    "shapes": ["deliver"],
+    "itemPools": ["overworld_common"],
+    "itemCount": 1,
+    "quantityRule": "phase1_primary_deliver"
+  }
+}

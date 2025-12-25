@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "id": "overworld_common",
+  "type": "item_pool",
+  "items": [
+    "minecraft:cobblestone",
+    "minecraft:oak_log",
+    "minecraft:coal",
+    "minecraft:iron_ingot"
+  ]
+}

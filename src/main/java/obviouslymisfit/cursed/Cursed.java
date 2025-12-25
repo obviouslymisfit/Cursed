@@ -42,6 +42,7 @@ public class Cursed implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CursedCommands.register(dispatcher));
+		obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader.loadAll(LOGGER, MOD_ID);
 
 
 	}
