@@ -12,6 +12,7 @@ import obviouslymisfit.cursed.state.persistence.StateStorage;
 import java.util.UUID;
 
 import obviouslymisfit.cursed.state.RunLifecycleState;
+import net.minecraft.server.level.ServerPlayer;
 
 
 public final class CursedCommands {
@@ -139,14 +140,29 @@ public final class CursedCommands {
 
                                     String runId = (state.runId == null) ? "none" : state.runId.toString();
 
-                                    src.sendSuccess(() -> Component.literal(
+                                    String teamText = "n/a";
+                                    if (state.teamsEnabled) {
+                                        teamText = "unassigned";
+                                        if (src.getEntity() instanceof ServerPlayer player) {
+                                            Integer teamIdx = state.playerTeams.get(player.getUUID());
+                                            if (teamIdx != null) {
+                                                teamText = "team " + teamIdx;
+                                            }
+                                        }
+                                    }
+
+                                    String msg =
                                             "CURSED status\n" +
                                                     "- lifecycle: " + state.lifecycleState + "\n" +
                                                     "- runId: " + runId + "\n" +
                                                     "- phase: " + state.phase + "\n" +
                                                     "- episode: " + state.episodeNumber + "\n" +
-                                                    "- schema: " + state.saveSchemaVersion
-                                    ), false);
+                                                    "- teamsEnabled: " + state.teamsEnabled + "\n" +
+                                                    "- team: " + teamText + "\n" +
+                                                    "- schema: " + state.saveSchemaVersion;
+
+                                    src.sendSuccess(() -> Component.literal(msg), false);
+
 
                                     return 1;
                                 }))

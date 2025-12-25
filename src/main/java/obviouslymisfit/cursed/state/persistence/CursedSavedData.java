@@ -8,6 +8,8 @@ import obviouslymisfit.cursed.state.RunLifecycleState;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * World-attached persistent storage for CURSED (1.21.10 Mojang mappings).
@@ -29,16 +31,28 @@ public final class CursedSavedData extends SavedData {
                     ),
                     Codec.STRING.fieldOf("lifecycleState").forGetter(d -> d.state.lifecycleState.name()),
                     Codec.INT.fieldOf("phase").forGetter(d -> d.state.phase),
-                    Codec.INT.fieldOf("episodeNumber").forGetter(d -> d.state.episodeNumber)
-            ).apply(instance, (saveSchemaVersion, runIdOpt, lifecycleStateName, phase, episodeNumber) -> {
+                    Codec.INT.fieldOf("episodeNumber").forGetter(d -> d.state.episodeNumber),
+
+                    // --- Teams ---
+                    Codec.BOOL.optionalFieldOf("teamsEnabled", false).forGetter(d -> d.state.teamsEnabled),
+                    Codec.INT.optionalFieldOf("teamCount", 0).forGetter(d -> d.state.teamCount),
+                    Codec.unboundedMap(Codec.STRING, Codec.INT)
+                            .optionalFieldOf("playerTeams", new HashMap<>())
+                            .forGetter(d -> {
+                                Map<String, Integer> out = new HashMap<>();
+                                d.state.playerTeams.forEach((uuid, teamIdx) -> out.put(uuid.toString(), teamIdx));
+                                return out;
+                            })
+
+            ).apply(instance, (saveSchemaVersion, runIdOpt, lifecycleStateName, phase, episodeNumber,
+                               teamsEnabled, teamCount, playerTeamsStrMap) -> {
+
                 CursedSavedData data = new CursedSavedData();
                 GameState s = new GameState();
 
                 s.saveSchemaVersion = saveSchemaVersion;
-
                 s.runId = runIdOpt.map(UUID::fromString).orElse(null);
 
-                // Safe parse for enum
                 try {
                     s.lifecycleState = RunLifecycleState.valueOf(lifecycleStateName);
                 } catch (Exception ignored) {
@@ -48,10 +62,26 @@ public final class CursedSavedData extends SavedData {
                 s.phase = phase;
                 s.episodeNumber = episodeNumber;
 
+                // Teams hydrate
+                s.teamsEnabled = teamsEnabled;
+                s.teamCount = teamCount;
+
+                s.playerTeams.clear();
+                if (playerTeamsStrMap != null) {
+                    playerTeamsStrMap.forEach((uuidStr, teamIdx) -> {
+                        try {
+                            s.playerTeams.put(UUID.fromString(uuidStr), teamIdx);
+                        } catch (Exception ignored) {
+                            // ignore malformed entries
+                        }
+                    });
+                }
+
                 data.state = s;
                 return data;
             })
     );
+
 
     private GameState state = new GameState();
 
