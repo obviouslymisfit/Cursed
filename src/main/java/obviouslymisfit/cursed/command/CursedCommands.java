@@ -16,7 +16,8 @@ import java.util.UUID;
 
 public final class CursedCommands {
 
-    private CursedCommands() {}
+    private CursedCommands() {
+    }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
@@ -169,6 +170,48 @@ public final class CursedCommands {
                         })));
 
         root.then(teams);
+
+        // /curse team assign <player> <team>
+        var team = Commands.literal("team");
+
+        team.then(Commands.literal("assign")
+                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                        .then(Commands.argument("team", IntegerArgumentType.integer(0, 7))
+                                .executes(ctx -> {
+                                    CommandSourceStack src = ctx.getSource();
+                                    MinecraftServer server = src.getServer();
+
+                                    GameState state = StateStorage.get(server);
+
+                                    if (!state.teamsEnabled || state.teamCount < 2) {
+                                        src.sendFailure(Component.literal(
+                                                "Teams are not configured. Use: /curse teams set <2-8>"
+                                        ));
+                                        return 0;
+                                    }
+
+                                    ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                                    int teamIdx = IntegerArgumentType.getInteger(ctx, "team");
+
+                                    if (teamIdx < 0 || teamIdx >= state.teamCount) {
+                                        src.sendFailure(Component.literal(
+                                                "Invalid team index. Valid range: 0.." + (state.teamCount - 1)
+                                        ));
+                                        return 0;
+                                    }
+
+                                    state.playerTeams.put(target.getUUID(), teamIdx);
+                                    StateStorage.save(server, state);
+
+                                    src.sendSuccess(() -> Component.literal(
+                                            "Assigned " + target.getName().getString() + " to team " + teamIdx
+                                    ), true);
+
+                                    return 1;
+                                }))));
+
+        root.then(team);
+
 
         // /curse status
         root.then(Commands.literal("status")
