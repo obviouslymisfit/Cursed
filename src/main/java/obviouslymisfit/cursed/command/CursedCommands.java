@@ -102,6 +102,34 @@ public final class CursedCommands {
                                             return 1;
                                         })))
 
+                        .then(Commands.literal("reset")
+                                .executes(ctx -> {
+                                    ctx.getSource().sendFailure(Component.literal(
+                                            "Reset is destructive. Use: /curse reset confirm"
+                                    ));
+                                    return 0;
+                                })
+                                .then(Commands.literal("confirm")
+                                        .executes(ctx -> {
+                                            CommandSourceStack src = ctx.getSource();
+                                            MinecraftServer server = src.getServer();
+
+                                            GameState state = StateStorage.get(server);
+
+                                            state.runId = null;
+                                            state.lifecycleState = RunLifecycleState.IDLE;
+                                            state.phase = 0;
+                                            state.episodeNumber = 0;
+
+                                            StateStorage.save(server, state);
+
+                                            src.sendSuccess(() -> Component.literal(
+                                                    "CURSED state reset. Back to IDLE."
+                                            ), true);
+
+                                            return 1;
+                                        })))
+
                         .then(Commands.literal("status")
                                 .executes(ctx -> {
                                     CommandSourceStack src = ctx.getSource();
