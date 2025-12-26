@@ -11,6 +11,9 @@ import net.minecraft.server.level.ServerPlayer;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
+import obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader;
+import obviouslymisfit.cursed.objectives.model.ObjectiveContent;
+
 
 import java.util.UUID;
 
@@ -57,201 +60,148 @@ public final class CursedCommands {
                 }));
 
         // /curse episode start|end
-        var episode = Commands.literal("episode");
+        root.then(Commands.literal("episode")
+                .then(Commands.literal("start")
+                        .executes(ctx -> {
+                            CommandSourceStack src = ctx.getSource();
+                            MinecraftServer server = src.getServer();
 
-        episode.then(Commands.literal("start")
-                .executes(ctx -> {
-                    CommandSourceStack src = ctx.getSource();
-                    MinecraftServer server = src.getServer();
+                            GameState state = StateStorage.get(server);
 
-                    GameState state = StateStorage.get(server);
+                            if (state.lifecycleState != RunLifecycleState.PAUSED) {
+                                src.sendFailure(Component.literal(
+                                        "CURSED is not paused. Cannot start episode."
+                                ));
+                                return 0;
+                            }
 
-                    if (state.lifecycleState != RunLifecycleState.PAUSED) {
-                        src.sendFailure(Component.literal(
-                                "CURSED is not paused. Cannot start episode."
-                        ));
-                        return 0;
-                    }
+                            state.lifecycleState = RunLifecycleState.RUNNING;
+                            StateStorage.save(server, state);
 
-                    state.lifecycleState = RunLifecycleState.RUNNING;
-                    StateStorage.save(server, state);
+                            src.sendSuccess(() -> Component.literal(
+                                    "CURSED episode started. State is now RUNNING."
+                            ), true);
 
-                    src.sendSuccess(() -> Component.literal(
-                            "CURSED episode started. State is now RUNNING."
-                    ), true);
+                            return 1;
+                        }))
+                .then(Commands.literal("end")
+                        .executes(ctx -> {
+                            CommandSourceStack src = ctx.getSource();
+                            MinecraftServer server = src.getServer();
 
-                    return 1;
-                }));
+                            GameState state = StateStorage.get(server);
 
-        episode.then(Commands.literal("end")
-                .executes(ctx -> {
-                    CommandSourceStack src = ctx.getSource();
-                    MinecraftServer server = src.getServer();
+                            if (state.lifecycleState != RunLifecycleState.RUNNING) {
+                                src.sendFailure(Component.literal(
+                                        "CURSED is not running. Cannot end episode."
+                                ));
+                                return 0;
+                            }
 
-                    GameState state = StateStorage.get(server);
+                            state.lifecycleState = RunLifecycleState.PAUSED;
+                            StateStorage.save(server, state);
 
-                    if (state.lifecycleState != RunLifecycleState.RUNNING) {
-                        src.sendFailure(Component.literal(
-                                "CURSED is not running. Cannot end episode."
-                        ));
-                        return 0;
-                    }
+                            src.sendSuccess(() -> Component.literal(
+                                    "CURSED episode ended. State is now PAUSED."
+                            ), true);
 
-                    state.lifecycleState = RunLifecycleState.PAUSED;
-                    StateStorage.save(server, state);
-
-                    src.sendSuccess(() -> Component.literal(
-                            "CURSED episode ended. State is now PAUSED."
-                    ), true);
-
-                    return 1;
-                }));
-
-        root.then(episode);
+                            return 1;
+                        }))
+        );
 
         // /curse reset confirm
-        var reset = Commands.literal("reset")
+        root.then(Commands.literal("reset")
                 .executes(ctx -> {
                     ctx.getSource().sendFailure(Component.literal(
                             "Reset is destructive. Use: /curse reset confirm"
                     ));
                     return 0;
-                });
-
-        reset.then(Commands.literal("confirm")
-                .executes(ctx -> {
-                    CommandSourceStack src = ctx.getSource();
-                    MinecraftServer server = src.getServer();
-
-                    GameState state = StateStorage.get(server);
-
-                    state.runId = null;
-                    state.lifecycleState = RunLifecycleState.IDLE;
-                    state.phase = 0;
-                    state.episodeNumber = 0;
-
-                    StateStorage.save(server, state);
-
-                    src.sendSuccess(() -> Component.literal(
-                            "CURSED state reset. Back to IDLE."
-                    ), true);
-
-                    return 1;
-                }));
-
-        root.then(reset);
-
-        // /curse teams set <count>
-        var teams = Commands.literal("teams");
-
-        teams.then(Commands.literal("set")
-                .then(Commands.argument("count", IntegerArgumentType.integer(2, 8))
+                })
+                .then(Commands.literal("confirm")
                         .executes(ctx -> {
                             CommandSourceStack src = ctx.getSource();
                             MinecraftServer server = src.getServer();
 
-                            int count = IntegerArgumentType.getInteger(ctx, "count");
-
                             GameState state = StateStorage.get(server);
 
-                            state.teamsEnabled = true;
-                            state.teamCount = count;
-                            state.playerTeams.clear();
+                            state.runId = null;
+                            state.lifecycleState = RunLifecycleState.IDLE;
+                            state.phase = 0;
+                            state.episodeNumber = 0;
 
                             StateStorage.save(server, state);
 
                             src.sendSuccess(() -> Component.literal(
-                                    "Teams enabled\n" +
-                                            "Team count set to " + count + "\n" +
-                                            "All team assignments cleared"
+                                    "CURSED state reset. Back to IDLE."
                             ), true);
 
                             return 1;
-                        })));
+                        }))
+        );
 
-        // /curse team assign <player> <team>
-        var team = Commands.literal("team");
-
-        team.then(Commands.literal("assign")
-                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
-                        .then(Commands.argument("team", IntegerArgumentType.integer(0, 7))
+        // /curse teams set <count>
+        root.then(Commands.literal("teams")
+                .then(Commands.literal("set")
+                        .then(Commands.argument("count", IntegerArgumentType.integer(2, 8))
                                 .executes(ctx -> {
                                     CommandSourceStack src = ctx.getSource();
                                     MinecraftServer server = src.getServer();
 
+                                    int count = IntegerArgumentType.getInteger(ctx, "count");
+
                                     GameState state = StateStorage.get(server);
+                                    state.teamsEnabled = true;
+                                    state.teamCount = count;
+                                    state.playerTeams.clear();
 
-                                    if (!state.teamsEnabled || state.teamCount < 2) {
-                                        src.sendFailure(Component.literal(
-                                                "Teams are not configured. Use: /curse teams set <2-8>"
-                                        ));
-                                        return 0;
-                                    }
-
-                                    ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
-                                    int teamIdx = IntegerArgumentType.getInteger(ctx, "team");
-
-                                    if (teamIdx < 0 || teamIdx >= state.teamCount) {
-                                        src.sendFailure(Component.literal(
-                                                "Invalid team index. Valid range: 0.." + (state.teamCount - 1)
-                                        ));
-                                        return 0;
-                                    }
-
-                                    state.playerTeams.put(target.getUUID(), teamIdx);
                                     StateStorage.save(server, state);
 
                                     src.sendSuccess(() -> Component.literal(
-                                            "Assigned " + target.getName().getString() + " to team " + teamIdx
+                                            "Teams enabled\n" +
+                                                    "Team count set to " + count + "\n" +
+                                                    "All team assignments cleared"
                                     ), true);
 
                                     return 1;
-                                }))));
-        team.then(Commands.literal("unassign")
-                .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                                })))
+        );
+
+        // /curse objectives debug
+        root.then(Commands.literal("objectives")
+                .then(Commands.literal("debug")
                         .executes(ctx -> {
                             CommandSourceStack src = ctx.getSource();
-                            MinecraftServer server = src.getServer();
 
-                            GameState state = StateStorage.get(server);
-
-                            ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
-
-                            Integer removed = state.playerTeams.remove(target.getUUID());
-                            StateStorage.save(server, state);
-
-                            if (removed == null) {
-                                src.sendSuccess(() -> Component.literal(
-                                        target.getName().getString() + " was not assigned to any team."
-                                ), true);
-                            } else {
-                                src.sendSuccess(() -> Component.literal(
-                                        "Unassigned " + target.getName().getString() + " from team " + removed
-                                ), true);
+                            ObjectiveContent content = ObjectiveContentLoader.getCachedOrNull();
+                            if (content == null) {
+                                src.sendFailure(Component.literal("Objective content not loaded."));
+                                return 0;
                             }
 
+                            int poolCount = content.poolsById().size();
+                            int qtyCount = content.quantityRulesById().size();
+                            int genCount = content.generatorByPhase().size();
+                            int hardCount = (content.hardConstraints() == null || content.hardConstraints().rules() == null)
+                                    ? 0 : content.hardConstraints().rules().size();
+
+                            String firstPool = content.poolsById().isEmpty()
+                                    ? "none" : content.poolsById().keySet().iterator().next();
+                            String firstQty = content.quantityRulesById().isEmpty()
+                                    ? "none" : content.quantityRulesById().keySet().iterator().next();
+                            String firstGen = content.generatorByPhase().isEmpty()
+                                    ? "none" : String.valueOf(content.generatorByPhase().keySet().iterator().next());
+
+                            src.sendSuccess(() -> Component.literal(
+                                    "CURSED objectives debug\n" +
+                                            "- pools: " + poolCount + " (e.g. " + firstPool + ")\n" +
+                                            "- quantity_rules: " + qtyCount + " (e.g. " + firstQty + ")\n" +
+                                            "- generator_rules: " + genCount + " (e.g. phase " + firstGen + ")\n" +
+                                            "- hard_constraints: " + hardCount
+                            ), false);
+
                             return 1;
-                        })));
-        teams.then(Commands.literal("clear")
-                .executes(ctx -> {
-                    CommandSourceStack src = ctx.getSource();
-                    MinecraftServer server = src.getServer();
-
-                    GameState state = StateStorage.get(server);
-
-                    int cleared = state.playerTeams.size();
-                    state.playerTeams.clear();
-                    StateStorage.save(server, state);
-
-                    src.sendSuccess(() -> Component.literal(
-                            "Cleared " + cleared + " team assignment(s)."
-                    ), true);
-
-                    return 1;
-                }));
-        root.then(teams);
-
-        root.then(team);
+                        }))
+        );
 
         // /curse status
         root.then(Commands.literal("status")
@@ -286,9 +236,12 @@ public final class CursedCommands {
 
                     src.sendSuccess(() -> Component.literal(msg), false);
                     return 1;
-                }));
+                })
+        );
 
-        // Register root
         dispatcher.register(root);
     }
+
+
+
 }
