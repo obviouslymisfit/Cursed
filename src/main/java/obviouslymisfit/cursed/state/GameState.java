@@ -3,6 +3,8 @@ package obviouslymisfit.cursed.state;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
+
 
 
 /**
@@ -32,6 +34,22 @@ public final class GameState {
      * Empty when teams are not configured.
      */
     public Map<UUID, Integer> playerTeams = new HashMap<>();
+
+    // Generated objective (persisted)
+    public int objectivePhase = 0;
+    public String objectiveType = null;   // "PRIMARY"
+    public String objectivePoolId = null; // e.g. "overworld_common"
+    public List<String> objectiveItems = List.of();
+    public int objectiveQuantity = 0;
+
+    public void clearObjective() {
+        objectivePhase = 0;
+        objectiveType = null;
+        objectivePoolId = null;
+        objectiveItems = List.of();
+        objectiveQuantity = 0;
+    }
+
 
     public GameState() {}
 }

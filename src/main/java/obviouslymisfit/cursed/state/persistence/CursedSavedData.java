@@ -42,10 +42,20 @@ public final class CursedSavedData extends SavedData {
                                 Map<String, Integer> out = new HashMap<>();
                                 d.state.playerTeams.forEach((uuid, teamIdx) -> out.put(uuid.toString(), teamIdx));
                                 return out;
-                            })
+                            }),
+                    // --- Objective (generated) ---
+                    Codec.INT.optionalFieldOf("objectivePhase", 0).forGetter(d -> d.state.objectivePhase),
+                    Codec.STRING.optionalFieldOf("objectiveType", "").forGetter(d -> d.state.objectiveType == null ? "" : d.state.objectiveType),
+                    Codec.STRING.optionalFieldOf("objectivePoolId", "").forGetter(d -> d.state.objectivePoolId == null ? "" : d.state.objectivePoolId),
+                    Codec.list(Codec.STRING).optionalFieldOf("objectiveItems", java.util.List.of()).forGetter(d -> d.state.objectiveItems),
+                    Codec.INT.optionalFieldOf("objectiveQuantity", 0).forGetter(d -> d.state.objectiveQuantity)
+
+
 
             ).apply(instance, (saveSchemaVersion, runIdOpt, lifecycleStateName, phase, episodeNumber,
-                               teamsEnabled, teamCount, playerTeamsStrMap) -> {
+                               teamsEnabled, teamCount, playerTeamsStrMap,
+                               objectivePhase, objectiveType, objectivePoolId, objectiveItems, objectiveQuantity) -> {
+
 
                 CursedSavedData data = new CursedSavedData();
                 GameState s = new GameState();
@@ -77,6 +87,12 @@ public final class CursedSavedData extends SavedData {
                     });
                 }
 
+                s.objectivePhase = objectivePhase;
+                s.objectiveType = (objectiveType == null || objectiveType.isEmpty()) ? null : objectiveType;
+                s.objectivePoolId = (objectivePoolId == null || objectivePoolId.isEmpty()) ? null : objectivePoolId;
+                s.objectiveItems = java.util.List.copyOf(objectiveItems == null ? java.util.List.of() : objectiveItems);
+                s.objectiveQuantity = objectiveQuantity;
+
                 data.state = s;
                 return data;
             })
@@ -85,7 +101,8 @@ public final class CursedSavedData extends SavedData {
 
     private GameState state = new GameState();
 
-    public CursedSavedData() {}
+    public CursedSavedData() {
+    }
 
     public GameState get() {
         return state;

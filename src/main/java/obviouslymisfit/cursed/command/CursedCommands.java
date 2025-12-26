@@ -130,6 +130,7 @@ public final class CursedCommands {
                             state.lifecycleState = RunLifecycleState.IDLE;
                             state.phase = 0;
                             state.episodeNumber = 0;
+                            state.clearObjective();
 
                             StateStorage.save(server, state);
 
@@ -223,8 +224,16 @@ public final class CursedCommands {
 
                             GeneratedObjective obj = ObjectiveGenerator.generatePhase1Primary(content, state.runId);
 
+                            state.objectivePhase = obj.phase;
+                            state.objectiveType = obj.objectiveType;
+                            state.objectivePoolId = obj.poolId;
+                            state.objectiveItems = java.util.List.copyOf(obj.items);
+                            state.objectiveQuantity = obj.quantity;
+
+                            StateStorage.save(server, state);
+
                             src.sendSuccess(() -> Component.literal(
-                                    "Generated objective (dry-run)\n" +
+                                    "Generated objective (saved)\n" +
                                             "- phase: " + obj.phase + "\n" +
                                             "- type: " + obj.objectiveType + "\n" +
                                             "- pool: " + obj.poolId + "\n" +
@@ -257,16 +266,30 @@ public final class CursedCommands {
                         teamText = "unassigned";
                     }
 
+                    String objectiveLine;
+                    if (state.objectiveType == null || state.objectiveItems == null || state.objectiveItems.isEmpty()) {
+                        objectiveLine = "- objective: none\n";
+                    } else {
+                        objectiveLine =
+                                "- objective: " + state.objectiveType + "\n" +
+                                        "  - phase: " + state.objectivePhase + "\n" +
+                                        "  - pool: " + state.objectivePoolId + "\n" +
+                                        "  - items: " + String.join(", ", state.objectiveItems) + "\n" +
+                                        "  - quantity: " + state.objectiveQuantity + "\n";
+                    }
+
                     String msg =
                             "CURSED status\n" +
                                     "- lifecycle: " + state.lifecycleState + "\n" +
                                     "- runId: " + runId + "\n" +
                                     "- phase: " + state.phase + "\n" +
                                     "- episode: " + state.episodeNumber + "\n" +
+                                    objectiveLine +
                                     "- teamsEnabled: " + state.teamsEnabled + "\n" +
                                     "- teamCount: " + state.teamCount + "\n" +
                                     "- team: " + teamText + "\n" +
                                     "- schema: " + state.saveSchemaVersion;
+
 
                     src.sendSuccess(() -> Component.literal(msg), false);
                     return 1;
