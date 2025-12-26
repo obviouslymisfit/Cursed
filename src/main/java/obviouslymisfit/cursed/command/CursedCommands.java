@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
+import obviouslymisfit.cursed.objectives.generator.ObjectiveGenerator;
+import obviouslymisfit.cursed.objectives.model.GeneratedObjective;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
@@ -201,6 +203,38 @@ public final class CursedCommands {
 
                             return 1;
                         }))
+                .then(Commands.literal("generate")
+                        .executes(ctx -> {
+                            CommandSourceStack src = ctx.getSource();
+                            MinecraftServer server = src.getServer();
+
+                            GameState state = StateStorage.get(server);
+
+                            if (state.runId == null) {
+                                src.sendFailure(Component.literal("No runId yet. Use /curse start first."));
+                                return 0;
+                            }
+
+                            ObjectiveContent content = ObjectiveContentLoader.getCachedOrNull();
+                            if (content == null) {
+                                src.sendFailure(Component.literal("Objective content not loaded."));
+                                return 0;
+                            }
+
+                            GeneratedObjective obj = ObjectiveGenerator.generatePhase1Primary(content, state.runId);
+
+                            src.sendSuccess(() -> Component.literal(
+                                    "Generated objective (dry-run)\n" +
+                                            "- phase: " + obj.phase + "\n" +
+                                            "- type: " + obj.objectiveType + "\n" +
+                                            "- pool: " + obj.poolId + "\n" +
+                                            "- items: " + String.join(", ", obj.items) + "\n" +
+                                            "- quantity: " + obj.quantity
+                            ), false);
+
+                            return 1;
+                        }))
+
         );
 
         // /curse status
