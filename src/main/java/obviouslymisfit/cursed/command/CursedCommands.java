@@ -8,21 +8,22 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
+import obviouslymisfit.cursed.objectives.constraints.ConstraintViolation;
+import obviouslymisfit.cursed.objectives.constraints.ObjectiveConstraintEngine;
 import obviouslymisfit.cursed.objectives.generator.ObjectiveGenerator;
+import obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader;
 import obviouslymisfit.cursed.objectives.model.GeneratedObjective;
+import obviouslymisfit.cursed.objectives.model.ObjectiveContent;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
-import obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader;
-import obviouslymisfit.cursed.objectives.model.ObjectiveContent;
 
-
+import java.util.List;
 import java.util.UUID;
 
 public final class CursedCommands {
 
-    private CursedCommands() {
-    }
+    private CursedCommands() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
@@ -169,7 +170,7 @@ public final class CursedCommands {
                                 })))
         );
 
-        // /curse objectives debug
+        // /curse objectives debug + generate
         root.then(Commands.literal("objectives")
                 .then(Commands.literal("debug")
                         .executes(ctx -> {
@@ -224,6 +225,24 @@ public final class CursedCommands {
 
                             GeneratedObjective obj = ObjectiveGenerator.generatePhase1Primary(content, state.runId);
 
+                            // --- constraints check (phase-level) ---
+                            var constraints = content.hardConstraints();
+                            List<ConstraintViolation> violations = ObjectiveConstraintEngine.validatePhase(
+                                    obj.phase,
+                                    constraints,
+                                    java.util.List.of(obj)
+                            );
+
+                            String constraintsLine = violations.isEmpty()
+                                    ? "- constraints: OK"
+                                    : "- constraints: FAIL (" + violations.size() + ")";
+
+                            StringBuilder violationLines = new StringBuilder();
+                            for (ConstraintViolation v : violations) {
+                                violationLines.append("\n  - ").append(v.ruleId()).append(": ").append(v.message());
+                            }
+
+                            // persist objective
                             state.objectivePhase = obj.phase;
                             state.objectiveType = obj.objectiveType;
                             state.objectivePoolId = obj.poolId;
@@ -237,13 +256,14 @@ public final class CursedCommands {
                                             "- phase: " + obj.phase + "\n" +
                                             "- type: " + obj.objectiveType + "\n" +
                                             "- pool: " + obj.poolId + "\n" +
-                                            "- items: " + String.join(", ", obj.items) + "\n" +
-                                            "- quantity: " + obj.quantity
+                                            "- items: " + String.join(",", obj.items) + "\n" +
+                                            "- quantity: " + obj.quantity + "\n" +
+                                            constraintsLine +
+                                            (violations.isEmpty() ? "" : violationLines.toString())
                             ), false);
 
                             return 1;
                         }))
-
         );
 
         // /curse status
@@ -290,7 +310,6 @@ public final class CursedCommands {
                                     "- team: " + teamText + "\n" +
                                     "- schema: " + state.saveSchemaVersion;
 
-
                     src.sendSuccess(() -> Component.literal(msg), false);
                     return 1;
                 })
@@ -298,7 +317,4 @@ public final class CursedCommands {
 
         dispatcher.register(root);
     }
-
-
-
 }
