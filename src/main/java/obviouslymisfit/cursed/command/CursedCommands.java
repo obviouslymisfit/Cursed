@@ -19,7 +19,6 @@ import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
 import obviouslymisfit.cursed.message.CursedMessages;
 
-
 import java.util.List;
 import java.util.UUID;
 
@@ -41,9 +40,7 @@ public final class CursedCommands {
                     GameState state = StateStorage.get(server);
 
                     if (state.lifecycleState != RunLifecycleState.IDLE) {
-                        src.sendFailure(Component.literal(
-                                "CURSED is already running or paused. Use /curse status."
-                        ));
+                        src.sendFailure(CursedMessages.alreadyRunningOrPaused());
                         return 0;
                     }
 
@@ -54,12 +51,7 @@ public final class CursedCommands {
 
                     StateStorage.save(server, state);
 
-                    src.sendSuccess(() -> Component.literal(
-                            "CURSED run started\n" +
-                                    "- runId: " + state.runId + "\n" +
-                                    "- phase: 1\n" +
-                                    "- episode: 1"
-                    ), true);
+                    src.sendSuccess(() -> CursedMessages.runStarted(state.runId, state.phase, state.episodeNumber), true);
 
                     return 1;
                 }));
@@ -74,18 +66,14 @@ public final class CursedCommands {
                             GameState state = StateStorage.get(server);
 
                             if (state.lifecycleState != RunLifecycleState.PAUSED) {
-                                src.sendFailure(Component.literal(
-                                        "CURSED is not paused. Cannot start episode."
-                                ));
+                                src.sendFailure(CursedMessages.episodeCannotStartNotPaused());
                                 return 0;
                             }
 
                             state.lifecycleState = RunLifecycleState.RUNNING;
                             StateStorage.save(server, state);
 
-                            src.sendSuccess(() -> Component.literal(
-                                    "CURSED episode started. State is now RUNNING."
-                            ), true);
+                            src.sendSuccess(() -> CursedMessages.episodeStartedNowRunning(), true);
 
                             return 1;
                         }))
@@ -97,29 +85,24 @@ public final class CursedCommands {
                             GameState state = StateStorage.get(server);
 
                             if (state.lifecycleState != RunLifecycleState.RUNNING) {
-                                src.sendFailure(Component.literal(
-                                        "CURSED is not running. Cannot end episode."
-                                ));
+                                src.sendFailure(CursedMessages.episodeCannotEndNotRunning());
                                 return 0;
                             }
 
                             state.lifecycleState = RunLifecycleState.PAUSED;
                             StateStorage.save(server, state);
 
-                            src.sendSuccess(() -> Component.literal(
-                                    "CURSED episode ended. State is now PAUSED."
-                            ), true);
+                            src.sendSuccess(() -> CursedMessages.episodeEndedNowPaused(), true);
 
                             return 1;
                         }))
         );
 
+
         // /curse reset confirm
         root.then(Commands.literal("reset")
                 .executes(ctx -> {
-                    ctx.getSource().sendFailure(Component.literal(
-                            "Reset is destructive. Use: /curse reset confirm"
-                    ));
+                    ctx.getSource().sendFailure(CursedMessages.resetWarnConfirmRequired());
                     return 0;
                 })
                 .then(Commands.literal("confirm")
@@ -137,13 +120,12 @@ public final class CursedCommands {
 
                             StateStorage.save(server, state);
 
-                            src.sendSuccess(() -> Component.literal(
-                                    "CURSED state reset. Back to IDLE."
-                            ), true);
+                            src.sendSuccess(() -> CursedMessages.resetDoneBackToIdle(), true);
 
                             return 1;
                         }))
         );
+
 
         // /curse teams set <count>
         root.then(Commands.literal("teams")
@@ -162,15 +144,15 @@ public final class CursedCommands {
 
                                     StateStorage.save(server, state);
 
-                                    src.sendSuccess(() -> Component.literal(
-                                            "Teams enabled\n" +
-                                                    "Team count set to " + count + "\n" +
-                                                    "All team assignments cleared"
-                                    ), true);
+                                    src.sendSuccess(
+                                            () -> CursedMessages.teamsConfigured(count),
+                                            true
+                                    );
 
                                     return 1;
                                 })))
         );
+
 
         // /curse objectives debug + generate
         root.then(Commands.literal("objectives")
@@ -184,29 +166,10 @@ public final class CursedCommands {
                                 return 0;
                             }
 
-                            int poolCount = content.poolsById().size();
-                            int qtyCount = content.quantityRulesById().size();
-                            int genCount = content.generatorByPhase().size();
-                            int hardCount = (content.hardConstraints() == null || content.hardConstraints().rules() == null)
-                                    ? 0 : content.hardConstraints().rules().size();
-
-                            String firstPool = content.poolsById().isEmpty()
-                                    ? "none" : content.poolsById().keySet().iterator().next();
-                            String firstQty = content.quantityRulesById().isEmpty()
-                                    ? "none" : content.quantityRulesById().keySet().iterator().next();
-                            String firstGen = content.generatorByPhase().isEmpty()
-                                    ? "none" : String.valueOf(content.generatorByPhase().keySet().iterator().next());
-
-                            src.sendSuccess(() -> Component.literal(
-                                    "CURSED objectives debug\n" +
-                                            "- pools: " + poolCount + " (e.g. " + firstPool + ")\n" +
-                                            "- quantity_rules: " + qtyCount + " (e.g. " + firstQty + ")\n" +
-                                            "- generator_rules: " + genCount + " (e.g. phase " + firstGen + ")\n" +
-                                            "- hard_constraints: " + hardCount
-                            ), false);
-
+                            src.sendSuccess(() -> CursedMessages.objectivesDebug(content), false);
                             return 1;
                         }))
+
                 .then(Commands.literal("generate")
                         .executes(ctx -> {
                             CommandSourceStack src = ctx.getSource();
@@ -227,22 +190,12 @@ public final class CursedCommands {
 
                             GeneratedObjective obj = ObjectiveGenerator.generatePhase1Primary(content, state.runId);
 
-                            // --- constraints check (phase-level) ---
                             var constraints = content.hardConstraints();
                             List<ConstraintViolation> violations = ObjectiveConstraintEngine.validatePhase(
                                     obj.phase,
                                     constraints,
                                     java.util.List.of(obj)
                             );
-
-                            String constraintsLine = violations.isEmpty()
-                                    ? "- constraints: OK"
-                                    : "- constraints: FAIL (" + violations.size() + ")";
-
-                            StringBuilder violationLines = new StringBuilder();
-                            for (ConstraintViolation v : violations) {
-                                violationLines.append("\n  - ").append(v.ruleId()).append(": ").append(v.message());
-                            }
 
                             // persist objective
                             state.objectivePhase = obj.phase;
@@ -253,20 +206,11 @@ public final class CursedCommands {
 
                             StateStorage.save(server, state);
 
-                            src.sendSuccess(() -> Component.literal(
-                                    "Generated objective (saved)\n" +
-                                            "- phase: " + obj.phase + "\n" +
-                                            "- type: " + obj.objectiveType + "\n" +
-                                            "- pool: " + obj.poolId + "\n" +
-                                            "- items: " + String.join(",", obj.items) + "\n" +
-                                            "- quantity: " + obj.quantity + "\n" +
-                                            constraintsLine +
-                                            (violations.isEmpty() ? "" : violationLines.toString())
-                            ), false);
-
+                            src.sendSuccess(() -> CursedMessages.objectiveGeneratedSaved(obj, violations), false);
                             return 1;
                         }))
         );
+
 
         // /curse status
         root.then(Commands.literal("status")
@@ -276,38 +220,28 @@ public final class CursedCommands {
 
                     GameState state = StateStorage.get(server);
 
-                    String runId = (state.runId == null) ? "none" : state.runId.toString();
-
-                    final String teamText;
-                    if (!state.teamsEnabled) {
-                        teamText = "n/a";
-                    } else if (src.getEntity() instanceof ServerPlayer player) {
-                        Integer teamIdx = state.playerTeams.get(player.getUUID());
-                        teamText = (teamIdx == null) ? "unassigned" : "team " + teamIdx;
-                    } else {
-                        teamText = "unassigned";
+                    // Step 1: compute value
+                    String computedTeamText = "n/a";
+                    if (state.teamsEnabled) {
+                        computedTeamText = "unassigned";
+                        if (src.getEntity() instanceof ServerPlayer player) {
+                            Integer teamIdx = state.playerTeams.get(player.getUUID());
+                            if (teamIdx != null) {
+                                computedTeamText = "team " + teamIdx;
+                            }
+                        }
                     }
 
-                    String objectiveLine;
-                    if (state.objectiveType == null || state.objectiveItems == null || state.objectiveItems.isEmpty()) {
-                        objectiveLine = "- objective: none\n";
-                    } else {
-                        objectiveLine =
-                                "- objective: " + state.objectiveType + "\n" +
-                                        "  - phase: " + state.objectivePhase + "\n" +
-                                        "  - pool: " + state.objectivePoolId + "\n" +
-                                        "  - items: " + String.join(", ", state.objectiveItems) + "\n" +
-                                        "  - quantity: " + state.objectiveQuantity + "\n";
-                    }
+                    // Step 2: freeze it
+                    final String teamText = computedTeamText;
 
-                    src.sendSuccess(
-                            () -> CursedMessages.status(state, teamText, objectiveLine),
-                            false
-                    );
+                    // Step 3: safe to use in lambda
+                    src.sendSuccess(() -> CursedMessages.status(state, teamText), false);
 
                     return 1;
                 })
         );
+
 
         dispatcher.register(root);
     }
