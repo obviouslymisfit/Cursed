@@ -17,6 +17,8 @@ import obviouslymisfit.cursed.objectives.model.ObjectiveContent;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
+import obviouslymisfit.cursed.message.CursedMessages;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -298,19 +300,11 @@ public final class CursedCommands {
                                         "  - quantity: " + state.objectiveQuantity + "\n";
                     }
 
-                    String msg =
-                            "CURSED status\n" +
-                                    "- lifecycle: " + state.lifecycleState + "\n" +
-                                    "- runId: " + runId + "\n" +
-                                    "- phase: " + state.phase + "\n" +
-                                    "- episode: " + state.episodeNumber + "\n" +
-                                    objectiveLine +
-                                    "- teamsEnabled: " + state.teamsEnabled + "\n" +
-                                    "- teamCount: " + state.teamCount + "\n" +
-                                    "- team: " + teamText + "\n" +
-                                    "- schema: " + state.saveSchemaVersion;
+                    src.sendSuccess(
+                            () -> CursedMessages.status(state, teamText, objectiveLine),
+                            false
+                    );
 
-                    src.sendSuccess(() -> Component.literal(msg), false);
                     return 1;
                 })
         );
