@@ -18,6 +18,9 @@ import obviouslymisfit.cursed.state.RunLifecycleState;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
+import obviouslymisfit.cursed.objectives.data.ObjectivesDataLoader;
+
+
 
 public class Cursed implements ModInitializer {
 	public static final String MOD_ID = "cursed";
@@ -29,6 +32,7 @@ public class Cursed implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ObjectivesDataLoader.loadAndValidate();
 		ConfigManager.loadAll();
 
 		DebugConfig debug = ConfigManager.debug();
