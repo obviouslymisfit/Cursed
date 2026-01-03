@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase1_secondary_deliver",
+  "phase": 1,
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 16,
+  "max": 32,
+  "step": 8,
+  "notes": "Phase 1 secondary deliver is light support progress. Quantity applies per picked item."
+}

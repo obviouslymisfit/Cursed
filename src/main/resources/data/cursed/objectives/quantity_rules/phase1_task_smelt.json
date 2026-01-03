@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase1_task_smelt",
+  "phase": 1,
+  "category": "TASK",
+  "type": "SMELT",
+  "roll_mode": "RANGE",
+  "min": 4,
+  "max": 8,
+  "step": 2,
+  "notes": "Smelt tasks mirror craft early; infrastructure is still forming."
+}

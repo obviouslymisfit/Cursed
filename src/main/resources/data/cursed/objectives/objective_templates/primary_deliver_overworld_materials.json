@@ -1,0 +1,15 @@
+{
+  "template_id": "primary_deliver_overworld_materials",
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "pool_refs": [
+    "primary_wood_overworld",
+    "primary_stone_overworld",
+    "primary_overworld_tech",
+    "primary_overworld_rare",
+    "primary_colored_blocks"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Primary baseline. Overworld-focused deliver objective. Allows colored blocks early. pick range supports escalation without new templates."
+}

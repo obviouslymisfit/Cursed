@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase4_primary_deliver",
+  "phase": 4,
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 512,
+  "max": 1024,
+  "step": 128,
+  "notes": "Phase 4 is punishing. Objectives can require deep infrastructure or risky travel. Per-item quantities apply."
+}

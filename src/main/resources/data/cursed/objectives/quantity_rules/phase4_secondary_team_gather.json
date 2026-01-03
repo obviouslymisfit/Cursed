@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase4_secondary_team_gather",
+  "phase": 4,
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "roll_mode": "RANGE",
+  "min": 64,
+  "max": 128,
+  "step": 16,
+  "notes": "Higher than deliver; cohesion (if applied later) is the real difficulty lever here."
+}

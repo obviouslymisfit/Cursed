@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase5_primary_deliver",
+  "phase": 5,
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 1024,
+  "max": 2048,
+  "step": 256,
+  "notes": "Endgame primary. Intimidating quantities by design. Per-item quantities apply for multi-pick."
+}

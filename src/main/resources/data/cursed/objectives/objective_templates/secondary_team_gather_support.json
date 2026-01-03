@@ -1,0 +1,14 @@
+{
+  "template_id": "secondary_team_gather_support",
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "pool_refs": [
+    "secondary_passive_animals",
+    "secondary_farming_crops",
+    "secondary_mining_resources",
+    "secondary_redstone_medium"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Secondary TEAM_GATHER objective. Lets teams contribute while split up. Cohesion (cluster) can be attached later via constraints."
+}

@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase5_secondary_team_gather",
+  "phase": 5,
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "roll_mode": "RANGE",
+  "min": 96,
+  "max": 192,
+  "step": 32,
+  "notes": "Defined for completeness; Phase 5 generator rules will not schedule secondary objectives."
+}

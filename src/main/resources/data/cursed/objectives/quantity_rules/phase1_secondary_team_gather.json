@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase1_secondary_team_gather",
+  "phase": 1,
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "roll_mode": "RANGE",
+  "min": 24,
+  "max": 48,
+  "step": 8,
+  "notes": "TEAM_GATHER can be slightly higher than deliver since it doesn't force spawn delivery."
+}

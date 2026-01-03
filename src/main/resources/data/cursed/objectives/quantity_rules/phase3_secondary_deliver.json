@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase3_secondary_deliver",
+  "phase": 3,
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 32,
+  "max": 64,
+  "step": 8,
+  "notes": "Secondary deliver ramps slowly; still not competing with primary."
+}

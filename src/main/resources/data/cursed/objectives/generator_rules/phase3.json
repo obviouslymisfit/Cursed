@@ -1,0 +1,32 @@
+{
+  "phase": 3,
+  "primary": {
+    "count": 1,
+    "eligible_templates": [
+      "primary_deliver_overworld_materials",
+      "primary_deliver_dimension_materials"
+    ]
+  },
+  "secondary": {
+    "count": 2,
+    "eligible_templates": [
+      "secondary_deliver_variety",
+      "secondary_deliver_exploration",
+      "secondary_team_gather_support"
+    ]
+  },
+  "tasks": {
+    "count": { "min": 2, "max": 4 },
+    "eligible_templates": [
+      "task_craft_basic",
+      "task_craft_infrastructure",
+      "task_smelt_pipeline"
+    ],
+    "cap_per_team": 8
+  },
+  "generation": {
+    "retry_budget_total": 350,
+    "retry_budget_per_slot": 60,
+    "notes": "Phase 3: dimension primary becomes eligible (actual gating is enforced later via constraints + runtime checks). More tasks allowed but still capped."
+  }
+}

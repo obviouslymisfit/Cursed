@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase2_secondary_deliver",
+  "phase": 2,
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 24,
+  "max": 48,
+  "step": 8,
+  "notes": "Phase 2 secondary deliver stays reasonable; still not the main driver."
+}

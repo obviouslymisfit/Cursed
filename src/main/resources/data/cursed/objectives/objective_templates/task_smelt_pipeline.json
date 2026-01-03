@@ -1,0 +1,12 @@
+{
+  "template_id": "task_smelt_pipeline",
+  "category": "TASK",
+  "type": "SMELT",
+  "pool_refs": [
+    "task_smelt_basic",
+    "task_smelt_advanced"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Task SMELT objective. Furnace pipeline progression. No delivery, no cohesion."
+}

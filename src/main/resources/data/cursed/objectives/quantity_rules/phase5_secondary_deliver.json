@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase5_secondary_deliver",
+  "phase": 5,
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 64,
+  "max": 128,
+  "step": 16,
+  "notes": "Defined for completeness; Phase 5 generator rules will not schedule secondary objectives."
+}

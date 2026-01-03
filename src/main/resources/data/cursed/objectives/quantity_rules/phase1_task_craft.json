@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase1_task_craft",
+  "phase": 1,
+  "category": "TASK",
+  "type": "CRAFT",
+  "roll_mode": "RANGE",
+  "min": 4,
+  "max": 8,
+  "step": 2,
+  "notes": "Early tasks should be quick wins and teach the task loop. Quantity applies per picked item."
+}

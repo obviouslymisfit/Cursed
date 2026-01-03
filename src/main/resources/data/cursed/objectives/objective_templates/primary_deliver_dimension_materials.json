@@ -1,0 +1,12 @@
+{
+  "template_id": "primary_deliver_dimension_materials",
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "pool_refs": [
+    "primary_nether_materials",
+    "primary_end_materials"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Primary escalation. Dimension materials (Nether/End). Gating/phase eligibility will be enforced via constraints + generator rules later."
+}

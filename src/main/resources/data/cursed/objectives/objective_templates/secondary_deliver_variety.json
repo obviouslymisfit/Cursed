@@ -1,0 +1,14 @@
+{
+  "template_id": "secondary_deliver_variety",
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "pool_refs": [
+    "secondary_decorative",
+    "secondary_farming_crops",
+    "secondary_mining_resources",
+    "secondary_food_prepared"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Secondary deliver objective for variety. Supports 1–2 items to add complexity without forcing cohesion."
+}

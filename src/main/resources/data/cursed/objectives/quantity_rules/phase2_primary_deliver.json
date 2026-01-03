@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase2_primary_deliver",
+  "phase": 2,
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 128,
+  "max": 256,
+  "step": 32,
+  "notes": "Phase 2 primary ramps pressure and coordination. Per-item quantities for multi-pick."
+}

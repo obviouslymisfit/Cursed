@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase3_task_smelt",
+  "phase": 3,
+  "category": "TASK",
+  "type": "SMELT",
+  "roll_mode": "RANGE",
+  "min": 8,
+  "max": 16,
+  "step": 2,
+  "notes": "Smelt stays aligned with craft for simplicity in tuning."
+}

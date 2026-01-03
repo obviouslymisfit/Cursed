@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase3_secondary_team_gather",
+  "phase": 3,
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "roll_mode": "RANGE",
+  "min": 48,
+  "max": 96,
+  "step": 16,
+  "notes": "Gather remains higher than deliver, reflecting reduced coordination burden."
+}

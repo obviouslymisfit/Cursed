@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 
 import obviouslymisfit.cursed.state.GameState;
 
-import java.util.List;
 import java.util.UUID;
 
 

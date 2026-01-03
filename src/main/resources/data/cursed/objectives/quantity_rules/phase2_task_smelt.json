@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase2_task_smelt",
+  "phase": 2,
+  "category": "TASK",
+  "type": "SMELT",
+  "roll_mode": "RANGE",
+  "min": 6,
+  "max": 12,
+  "step": 2,
+  "notes": "Smelt remains low-value, low-quantity. No grind."
+}

@@ -1,0 +1,32 @@
+{
+  "phase": 4,
+  "primary": {
+    "count": 1,
+    "eligible_templates": [
+      "primary_deliver_overworld_materials",
+      "primary_deliver_dimension_materials"
+    ]
+  },
+  "secondary": {
+    "count": 2,
+    "eligible_templates": [
+      "secondary_deliver_variety",
+      "secondary_deliver_exploration",
+      "secondary_team_gather_support"
+    ]
+  },
+  "tasks": {
+    "count": { "min": 1, "max": 3 },
+    "eligible_templates": [
+      "task_craft_basic",
+      "task_craft_infrastructure",
+      "task_smelt_pipeline"
+    ],
+    "cap_per_team": 8
+  },
+  "generation": {
+    "retry_budget_total": 450,
+    "retry_budget_per_slot": 70,
+    "notes": "Phase 4: primary can be overworld or dimension. Tasks slightly reduced to keep focus on survival pressure and objectives."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase4_task_craft",
+  "phase": 4,
+  "category": "TASK",
+  "type": "CRAFT",
+  "roll_mode": "RANGE",
+  "min": 10,
+  "max": 20,
+  "step": 2,
+  "notes": "Tasks remain bounded; difficulty in late game comes from curses + primary pressure, not task grind."
+}

@@ -1,0 +1,24 @@
+{
+  "phase": 5,
+  "primary": {
+    "count": 1,
+    "eligible_templates": [
+      "primary_deliver_overworld_materials",
+      "primary_deliver_dimension_materials"
+    ]
+  },
+  "secondary": {
+    "count": 0,
+    "eligible_templates": []
+  },
+  "tasks": {
+    "count": { "min": 0, "max": 0 },
+    "eligible_templates": [],
+    "cap_per_team": 0
+  },
+  "generation": {
+    "retry_budget_total": 600,
+    "retry_budget_per_slot": 120,
+    "notes": "Phase 5: primary only endgame tightening. No secondary objectives. No tasks."
+  }
+}

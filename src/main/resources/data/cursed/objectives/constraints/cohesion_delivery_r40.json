@@ -1,0 +1,7 @@
+{
+  "constraint_id": "cohesion_delivery_r40",
+  "type": "COHESION",
+  "mode": "DELIVERY_CHEST_ANCHORED",
+  "radius_blocks": 40,
+  "notes": "All team members must be within radius of the team chest at completion time for delivery objectives."
+}

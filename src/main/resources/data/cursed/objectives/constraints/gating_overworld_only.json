@@ -1,0 +1,5 @@
+{
+  "constraint_id": "gating_overworld_only",
+  "type": "GATING",
+  "notes": "Allows only objectives whose selected items are obtainable without requiring Nether/End access. Exact rule implemented by engine later."
+}

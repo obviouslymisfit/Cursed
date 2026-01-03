@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase4_secondary_deliver",
+  "phase": 4,
+  "category": "SECONDARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 48,
+  "max": 96,
+  "step": 16,
+  "notes": "Secondary deliver ramps but remains optional compared to primary."
+}

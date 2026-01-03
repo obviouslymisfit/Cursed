@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase1_primary_deliver",
+  "phase": 1,
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 64,
+  "max": 128,
+  "step": 16,
+  "notes": "Phase 1 primary should feel meaningful but not absurd. Quantity applies per picked item."
+}

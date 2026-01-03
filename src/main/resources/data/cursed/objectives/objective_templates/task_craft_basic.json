@@ -1,0 +1,11 @@
+{
+  "template_id": "task_craft_basic",
+  "category": "TASK",
+  "type": "CRAFT",
+  "pool_refs": [
+    "task_craft_basic"
+  ],
+  "pick": { "min": 1, "max": 2 },
+  "constraints": [],
+  "notes": "Task CRAFT objective. Basic crafting loop. No delivery, no cohesion."
+}

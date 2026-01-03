@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase5_task_smelt",
+  "phase": 5,
+  "category": "TASK",
+  "type": "SMELT",
+  "roll_mode": "RANGE",
+  "min": 12,
+  "max": 24,
+  "step": 2,
+  "notes": "Defined for completeness; Phase 5 generator rules will not schedule tasks."
+}

@@ -1,0 +1,7 @@
+{
+  "constraint_id": "cohesion_gather_r40",
+  "type": "COHESION",
+  "mode": "GATHER_CLUSTER_ANCHORED",
+  "radius_blocks": 40,
+  "notes": "All team members must be within radius of each other at completion time for TEAM_GATHER objectives."
+}

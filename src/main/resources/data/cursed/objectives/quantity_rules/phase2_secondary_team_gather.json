@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase2_secondary_team_gather",
+  "phase": 2,
+  "category": "SECONDARY",
+  "type": "TEAM_GATHER",
+  "roll_mode": "RANGE",
+  "min": 32,
+  "max": 64,
+  "step": 8,
+  "notes": "Gather slightly above deliver. Still split-friendly."
+}

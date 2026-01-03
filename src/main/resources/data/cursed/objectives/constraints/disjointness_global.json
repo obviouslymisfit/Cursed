@@ -1,0 +1,5 @@
+{
+  "constraint_id": "disjointness_global",
+  "type": "DISJOINTNESS",
+  "notes": "Run-wide item ID disjointness. Engine enforces: once an item ID appears in any objective/task, it cannot appear again in the run."
+}

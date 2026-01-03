@@ -1,0 +1,11 @@
+{
+  "rule_id": "phase3_primary_deliver",
+  "phase": 3,
+  "category": "PRIMARY",
+  "type": "DELIVER",
+  "roll_mode": "RANGE",
+  "min": 256,
+  "max": 512,
+  "step": 64,
+  "notes": "Phase 3 is the first real stress tier. Multi-pick becomes serious due to per-item quantities."
+}

@@ -1,0 +1,5 @@
+{
+  "constraint_id": "gating_dimension_allowed",
+  "type": "GATING",
+  "notes": "Allows objectives that may require Nether/End access. Used for later-phase eligibility. Exact rule implemented by engine later."
+}
