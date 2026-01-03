@@ -1,0 +1,33 @@
+{
+  "type": "item_pool",
+  "id": "primary_overworld_rare",
+  "phases": { "min": 2, "max": 5 },
+  "items": [
+    "minecraft:gold_ingot",
+    "minecraft:gold_nugget",
+    "minecraft:raw_gold",
+    "minecraft:gold_block",
+    "minecraft:raw_gold_block",
+    "minecraft:gold_ore",
+    "minecraft:deepslate_gold_ore",
+
+    "minecraft:lapis_lazuli",
+    "minecraft:lapis_block",
+    "minecraft:lapis_ore",
+    "minecraft:deepslate_lapis_ore",
+
+    "minecraft:diamond",
+    "minecraft:diamond_block",
+    "minecraft:diamond_ore",
+    "minecraft:deepslate_diamond_ore",
+
+    "minecraft:emerald",
+    "minecraft:emerald_block",
+    "minecraft:emerald_ore",
+    "minecraft:deepslate_emerald_ore",
+
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_block",
+    "minecraft:budding_amethyst"
+  ]
+}

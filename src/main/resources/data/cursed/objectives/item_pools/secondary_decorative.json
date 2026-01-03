@@ -1,0 +1,62 @@
+{
+  "type": "item_pool",
+  "id": "secondary_decorative",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:flower_pot",
+    "minecraft:painting",
+    "minecraft:item_frame",
+    "minecraft:glow_item_frame",
+
+    "minecraft:candle",
+    "minecraft:white_candle",
+    "minecraft:orange_candle",
+    "minecraft:magenta_candle",
+    "minecraft:light_blue_candle",
+    "minecraft:yellow_candle",
+    "minecraft:lime_candle",
+    "minecraft:pink_candle",
+    "minecraft:gray_candle",
+    "minecraft:light_gray_candle",
+    "minecraft:cyan_candle",
+    "minecraft:purple_candle",
+    "minecraft:blue_candle",
+    "minecraft:brown_candle",
+    "minecraft:green_candle",
+    "minecraft:red_candle",
+    "minecraft:black_candle",
+
+    "minecraft:lantern",
+    "minecraft:soul_lantern",
+    "minecraft:torch",
+    "minecraft:soul_torch",
+
+    "minecraft:campfire",
+    "minecraft:soul_campfire",
+
+    "minecraft:bookshelf",
+    "minecraft:lectern",
+
+    "minecraft:jukebox",
+    "minecraft:note_block",
+
+    "minecraft:armor_stand",
+
+    "minecraft:white_bed",
+    "minecraft:orange_bed",
+    "minecraft:magenta_bed",
+    "minecraft:light_blue_bed",
+    "minecraft:yellow_bed",
+    "minecraft:lime_bed",
+    "minecraft:pink_bed",
+    "minecraft:gray_bed",
+    "minecraft:light_gray_bed",
+    "minecraft:cyan_bed",
+    "minecraft:purple_bed",
+    "minecraft:blue_bed",
+    "minecraft:brown_bed",
+    "minecraft:green_bed",
+    "minecraft:red_bed",
+    "minecraft:black_bed"
+  ]
+}

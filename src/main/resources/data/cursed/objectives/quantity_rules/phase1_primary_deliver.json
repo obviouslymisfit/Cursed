@@ -1,9 +1,0 @@
-{
-  "schema": 1,
-  "id": "phase1_primary_deliver",
-  "phase": 1,
-  "tier": "primary",
-  "shape": "deliver",
-  "mode": "discrete",
-  "values": [64, 128, 256, 512]
-}

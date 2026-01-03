@@ -1,0 +1,31 @@
+{
+  "type": "item_pool",
+  "id": "task_craft_infra",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:anvil",
+    "minecraft:grindstone",
+    "minecraft:smithing_table",
+    "minecraft:cartography_table",
+    "minecraft:fletching_table",
+    "minecraft:loom",
+
+    "minecraft:blast_furnace",
+    "minecraft:smoker",
+
+    "minecraft:enchanting_table",
+    "minecraft:ender_chest",
+
+    "minecraft:hopper",
+    "minecraft:dispenser",
+    "minecraft:dropper"
+  ],
+  "phase_overrides": {
+    "3": {
+      "include": [
+        "minecraft:brewing_stand",
+        "minecraft:cauldron"
+      ]
+    }
+  }
+}

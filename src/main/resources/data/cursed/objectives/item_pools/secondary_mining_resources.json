@@ -1,0 +1,39 @@
+{
+  "type": "item_pool",
+  "id": "secondary_mining_resources",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:flint",
+    "minecraft:gravel",
+
+    "minecraft:clay_ball",
+    "minecraft:clay",
+
+    "minecraft:amethyst_shard",
+    "minecraft:calcite",
+    "minecraft:tuff",
+
+    "minecraft:pointed_dripstone",
+    "minecraft:dripstone_block",
+
+    "minecraft:cobweb",
+    "minecraft:string",
+
+    "minecraft:glow_lichen",
+
+    "minecraft:obsidian",
+    "minecraft:crying_obsidian"
+  ],
+  "phase_overrides": {
+    "3": {
+      "include": [
+        "minecraft:glowstone_dust"
+      ]
+    },
+    "5": {
+      "include": [
+        "minecraft:chorus_fruit"
+      ]
+    }
+  }
+}

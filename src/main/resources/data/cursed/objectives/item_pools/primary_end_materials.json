@@ -1,0 +1,29 @@
+{
+  "type": "item_pool",
+  "id": "primary_end_materials",
+  "phases": { "min": 5, "max": 5 },
+  "items": [
+    "minecraft:end_stone",
+    "minecraft:end_stone_bricks",
+    "minecraft:end_stone_brick_slab",
+    "minecraft:end_stone_brick_stairs",
+    "minecraft:end_stone_brick_wall",
+
+    "minecraft:purpur_block",
+    "minecraft:purpur_pillar",
+    "minecraft:purpur_slab",
+    "minecraft:purpur_stairs",
+
+    "minecraft:chorus_fruit",
+    "minecraft:popped_chorus_fruit",
+    "minecraft:chorus_plant",
+    "minecraft:chorus_flower",
+
+    "minecraft:shulker_shell",
+
+    "minecraft:elytra",
+
+    "minecraft:ender_pearl",
+    "minecraft:end_rod"
+  ]
+}

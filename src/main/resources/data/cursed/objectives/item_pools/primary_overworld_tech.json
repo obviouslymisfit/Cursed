@@ -1,0 +1,32 @@
+{
+  "type": "item_pool",
+  "id": "primary_overworld_tech",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:coal",
+    "minecraft:charcoal",
+    "minecraft:coal_block",
+    "minecraft:coal_ore",
+    "minecraft:deepslate_coal_ore",
+
+    "minecraft:iron_ingot",
+    "minecraft:iron_nugget",
+    "minecraft:raw_iron",
+    "minecraft:iron_block",
+    "minecraft:raw_iron_block",
+    "minecraft:iron_ore",
+    "minecraft:deepslate_iron_ore",
+
+    "minecraft:copper_ingot",
+    "minecraft:raw_copper",
+    "minecraft:copper_block",
+    "minecraft:raw_copper_block",
+    "minecraft:copper_ore",
+    "minecraft:deepslate_copper_ore",
+
+    "minecraft:redstone",
+    "minecraft:redstone_block",
+    "minecraft:redstone_ore",
+    "minecraft:deepslate_redstone_ore"
+  ]
+}

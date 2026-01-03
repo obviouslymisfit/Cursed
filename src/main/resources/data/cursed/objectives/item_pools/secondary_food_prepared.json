@@ -1,0 +1,25 @@
+{
+  "type": "item_pool",
+  "id": "secondary_food_prepared",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:bread",
+
+    "minecraft:baked_potato",
+    "minecraft:beetroot_soup",
+    "minecraft:mushroom_stew",
+    "minecraft:rabbit_stew",
+
+    "minecraft:cooked_cod",
+    "minecraft:cooked_salmon",
+
+    "minecraft:pumpkin_pie",
+    "minecraft:cookie",
+
+    "minecraft:dried_kelp",
+
+    "minecraft:honey_bottle",
+
+    "minecraft:suspicious_stew"
+  ]
+}

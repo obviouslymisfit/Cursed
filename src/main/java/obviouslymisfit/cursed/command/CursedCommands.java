@@ -8,12 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
-import obviouslymisfit.cursed.objectives.constraints.ConstraintViolation;
-import obviouslymisfit.cursed.objectives.constraints.ObjectiveConstraintEngine;
-import obviouslymisfit.cursed.objectives.generator.ObjectiveGenerator;
-import obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader;
-import obviouslymisfit.cursed.objectives.model.GeneratedObjective;
-import obviouslymisfit.cursed.objectives.model.ObjectiveContent;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
@@ -151,64 +145,6 @@ public final class CursedCommands {
 
                                     return 1;
                                 })))
-        );
-
-
-        // /curse objectives debug + generate
-        root.then(Commands.literal("objectives")
-                .then(Commands.literal("debug")
-                        .executes(ctx -> {
-                            CommandSourceStack src = ctx.getSource();
-
-                            ObjectiveContent content = ObjectiveContentLoader.getCachedOrNull();
-                            if (content == null) {
-                                src.sendFailure(Component.literal("Objective content not loaded."));
-                                return 0;
-                            }
-
-                            src.sendSuccess(() -> CursedMessages.objectivesDebug(content), false);
-                            return 1;
-                        }))
-
-                .then(Commands.literal("generate")
-                        .executes(ctx -> {
-                            CommandSourceStack src = ctx.getSource();
-                            MinecraftServer server = src.getServer();
-
-                            GameState state = StateStorage.get(server);
-
-                            if (state.runId == null) {
-                                src.sendFailure(Component.literal("No runId yet. Use /curse start first."));
-                                return 0;
-                            }
-
-                            ObjectiveContent content = ObjectiveContentLoader.getCachedOrNull();
-                            if (content == null) {
-                                src.sendFailure(Component.literal("Objective content not loaded."));
-                                return 0;
-                            }
-
-                            GeneratedObjective obj = ObjectiveGenerator.generatePhase1Primary(content, state.runId);
-
-                            var constraints = content.hardConstraints();
-                            List<ConstraintViolation> violations = ObjectiveConstraintEngine.validatePhase(
-                                    obj.phase,
-                                    constraints,
-                                    java.util.List.of(obj)
-                            );
-
-                            // persist objective
-                            state.objectivePhase = obj.phase;
-                            state.objectiveType = obj.objectiveType;
-                            state.objectivePoolId = obj.poolId;
-                            state.objectiveItems = java.util.List.copyOf(obj.items);
-                            state.objectiveQuantity = obj.quantity;
-
-                            StateStorage.save(server, state);
-
-                            src.sendSuccess(() -> CursedMessages.objectiveGeneratedSaved(obj, violations), false);
-                            return 1;
-                        }))
         );
 
 

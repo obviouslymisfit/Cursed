@@ -2,6 +2,7 @@ package obviouslymisfit.cursed;
 
 import net.fabricmc.api.ModInitializer;
 
+import obviouslymisfit.cursed.command.CursedCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +17,6 @@ import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import obviouslymisfit.cursed.command.CursedCommands;
-
 
 
 public class Cursed implements ModInitializer {
@@ -42,7 +41,6 @@ public class Cursed implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CursedCommands.register(dispatcher));
-		obviouslymisfit.cursed.objectives.io.ObjectiveContentLoader.loadAll(LOGGER, MOD_ID);
 
 
 	}

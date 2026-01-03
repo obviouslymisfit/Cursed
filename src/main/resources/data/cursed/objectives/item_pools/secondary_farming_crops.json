@@ -1,0 +1,44 @@
+{
+  "type": "item_pool",
+  "id": "secondary_farming_crops",
+  "phases": { "min": 1, "max": 5 },
+  "items": [
+    "minecraft:wheat",
+    "minecraft:wheat_seeds",
+    "minecraft:hay_block",
+
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:beetroot",
+    "minecraft:beetroot_seeds",
+
+    "minecraft:pumpkin",
+    "minecraft:carved_pumpkin",
+    "minecraft:jack_o_lantern",
+    "minecraft:pumpkin_seeds",
+
+    "minecraft:melon",
+    "minecraft:melon_slice",
+    "minecraft:melon_seeds",
+
+    "minecraft:sugar_cane",
+    "minecraft:bamboo",
+
+    "minecraft:cactus",
+
+    "minecraft:kelp",
+    "minecraft:dried_kelp",
+    "minecraft:dried_kelp_block",
+
+    "minecraft:sea_pickle",
+
+    "minecraft:chorus_fruit"
+  ],
+  "phase_overrides": {
+    "4": {
+      "include": [
+        "minecraft:nether_wart"
+      ]
+    }
+  }
+}

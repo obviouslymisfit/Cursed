@@ -1,0 +1,24 @@
+{
+  "type": "item_pool",
+  "id": "task_smelt_advanced",
+  "phases": { "min": 2, "max": 5 },
+  "items": [
+    "minecraft:gold_ingot",
+    "minecraft:smooth_quartz",
+    "minecraft:nether_brick",
+    "minecraft:brick",
+    "minecraft:terracotta"
+  ],
+  "phase_overrides": {
+    "3": {
+      "include": [
+        "minecraft:glass"
+      ]
+    },
+    "5": {
+      "include": [
+        "minecraft:netherite_scrap"
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "item_pool",
+  "id": "task_craft_redstone",
+  "phases": { "min": 2, "max": 5 },
+  "items": [
+    "minecraft:repeater",
+    "minecraft:comparator",
+    "minecraft:observer",
+
+    "minecraft:piston",
+    "minecraft:sticky_piston",
+
+    "minecraft:hopper",
+    "minecraft:dropper",
+    "minecraft:dispenser"
+  ]
+}
