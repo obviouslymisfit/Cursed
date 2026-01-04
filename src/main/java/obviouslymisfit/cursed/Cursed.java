@@ -50,7 +50,11 @@ public class Cursed implements ModInitializer {
 	}
 
 	private void onServerStarted(MinecraftServer server) {
+		// M1: load run_state.json (fallback .bak) into authoritative in-memory state if present.
+		StateStorage.loadFromFileIfPresent(server);
+
 		GameState state = StateStorage.get(server);
+
 
 		// Schema enforcement: fail loudly if mismatch.
 		if (state.saveSchemaVersion != GameState.EXPECTED_SAVE_SCHEMA_VERSION) {
