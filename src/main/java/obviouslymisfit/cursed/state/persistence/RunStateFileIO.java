@@ -7,7 +7,13 @@ import com.google.gson.annotations.SerializedName;
 import net.minecraft.server.MinecraftServer;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveDefinition;
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveSlot;
+import obviouslymisfit.cursed.objectives.runtime.TeamObjectiveState;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -152,10 +158,13 @@ public final class RunStateFileIO {
             throw new IOException("Missing state object in " + path.getFileName());
         }
 
-        // Ensure in-memory schema version matches envelope.
-        env.state.saveSchemaVersion = env.schemaVersion;
+        GameState restored = env.state.toGameState();
 
-        return env.state;
+        // Ensure in-memory schema version matches envelope.
+        restored.saveSchemaVersion = env.schemaVersion;
+
+        return restored;
+
     }
 
     private static void writeAtomic(Path tmp, String payload) throws IOException {
@@ -181,7 +190,7 @@ public final class RunStateFileIO {
      *
      * {
      *   "schema_version": 1,
-     *   "state": { ... GameState fields ... }
+     *   "state": { ... persisted fields ... }
      * }
      */
     private static final class FileEnvelope {
@@ -189,13 +198,198 @@ public final class RunStateFileIO {
         int schemaVersion;
 
         @SerializedName("state")
-        GameState state;
+        PersistedState state;
 
         static FileEnvelope from(GameState state) {
             FileEnvelope e = new FileEnvelope();
             e.schemaVersion = GameState.EXPECTED_SAVE_SCHEMA_VERSION;
-            e.state = state;
+            e.state = PersistedState.from(state);
             return e;
         }
     }
+
+    /**
+     * Persistence DTO for run_state.json.
+     * Uses JSON-friendly keys for stable output and deterministic diffs.
+     *
+     * NOTE: Runtime models remain in GameState. This is only the serialized shape.
+     */
+    private static final class PersistedState {
+
+        @SerializedName("run_id")
+        String runId; // nullable
+
+        @SerializedName("lifecycle_state")
+        String lifecycleState;
+
+        @SerializedName("phase")
+        int phase;
+
+        @SerializedName("episode_number")
+        int episodeNumber;
+
+        @SerializedName("teams_enabled")
+        boolean teamsEnabled;
+
+        @SerializedName("team_count")
+        int teamCount;
+
+        @SerializedName("player_teams")
+        Map<String, Integer> playerTeams = new HashMap<>();
+
+        // Key: "phase:slot" (e.g. "3:SECONDARY_2")
+        @SerializedName("objective_definitions")
+        Map<String, ObjectiveDefinition> objectiveDefinitions = new HashMap<>();
+
+        // teamIdx -> ("phase:slot" -> TeamObjectiveState)
+        @SerializedName("team_objective_states")
+        Map<Integer, Map<String, TeamObjectiveState>> teamObjectiveStates = new HashMap<>();
+
+        static PersistedState from(GameState s) {
+            PersistedState p = new PersistedState();
+
+            p.runId = (s.runId == null) ? null : s.runId.toString();
+            p.lifecycleState = (s.lifecycleState == null) ? RunLifecycleState.IDLE.name() : s.lifecycleState.name();
+            p.phase = s.phase;
+            p.episodeNumber = s.episodeNumber;
+
+            p.teamsEnabled = s.teamsEnabled;
+            p.teamCount = s.teamCount;
+
+            // UUID -> String
+            if (s.playerTeams != null) {
+                for (Map.Entry<UUID, Integer> e : s.playerTeams.entrySet()) {
+                    if (e.getKey() != null && e.getValue() != null) {
+                        p.playerTeams.put(e.getKey().toString(), e.getValue());
+                    }
+                }
+            }
+
+            // objectiveDefinitions: Map<Integer, Map<ObjectiveSlot, ObjectiveDefinition>> -> Map<String, ObjectiveDefinition>
+            if (s.objectiveDefinitions != null) {
+                for (Map.Entry<Integer, Map<ObjectiveSlot, ObjectiveDefinition>> byPhase : s.objectiveDefinitions.entrySet()) {
+                    Integer phase = byPhase.getKey();
+                    if (phase == null || byPhase.getValue() == null) continue;
+
+                    for (Map.Entry<ObjectiveSlot, ObjectiveDefinition> bySlot : byPhase.getValue().entrySet()) {
+                        if (bySlot.getKey() == null || bySlot.getValue() == null) continue;
+                        String key = phase + ":" + bySlot.getKey().name();
+                        p.objectiveDefinitions.put(key, bySlot.getValue());
+                    }
+                }
+            }
+
+            // teamObjectiveStates: Map<Integer, Map<Integer, Map<ObjectiveSlot, TeamObjectiveState>>>
+            if (s.teamObjectiveStates != null) {
+                for (Map.Entry<Integer, Map<Integer, Map<ObjectiveSlot, TeamObjectiveState>>> byTeam : s.teamObjectiveStates.entrySet()) {
+                    Integer teamIdx = byTeam.getKey();
+                    if (teamIdx == null || byTeam.getValue() == null) continue;
+
+                    Map<String, TeamObjectiveState> flat = new HashMap<>();
+                    for (Map.Entry<Integer, Map<ObjectiveSlot, TeamObjectiveState>> byPhase : byTeam.getValue().entrySet()) {
+                        Integer phase = byPhase.getKey();
+                        if (phase == null || byPhase.getValue() == null) continue;
+
+                        for (Map.Entry<ObjectiveSlot, TeamObjectiveState> bySlot : byPhase.getValue().entrySet()) {
+                            if (bySlot.getKey() == null || bySlot.getValue() == null) continue;
+                            String key = phase + ":" + bySlot.getKey().name();
+                            flat.put(key, bySlot.getValue());
+                        }
+                    }
+
+                    p.teamObjectiveStates.put(teamIdx, flat);
+                }
+            }
+
+            return p;
+        }
+
+        GameState toGameState() throws IOException {
+            GameState s = new GameState();
+
+            s.runId = (runId == null || runId.isBlank()) ? null : UUID.fromString(runId);
+            s.lifecycleState = (lifecycleState == null || lifecycleState.isBlank())
+                    ? RunLifecycleState.IDLE
+                    : RunLifecycleState.valueOf(lifecycleState);
+
+            s.phase = phase;
+            s.episodeNumber = episodeNumber;
+
+            s.teamsEnabled = teamsEnabled;
+            s.teamCount = teamCount;
+
+            // String -> UUID
+            if (playerTeams != null) {
+                for (Map.Entry<String, Integer> e : playerTeams.entrySet()) {
+                    if (e.getKey() == null || e.getKey().isBlank() || e.getValue() == null) continue;
+                    s.playerTeams.put(UUID.fromString(e.getKey()), e.getValue());
+                }
+            }
+
+            // objective definitions: "phase:SLOT"
+            if (objectiveDefinitions != null) {
+                for (Map.Entry<String, ObjectiveDefinition> e : objectiveDefinitions.entrySet()) {
+                    if (e.getKey() == null || e.getValue() == null) continue;
+
+                    KeyParts kp = KeyParts.parse(e.getKey());
+                    s.objectiveDefinitions
+                            .computeIfAbsent(kp.phase, __ -> new HashMap<>())
+                            .put(kp.slot, e.getValue());
+                }
+            }
+
+            // team states: teamIdx -> "phase:SLOT" -> state
+            if (teamObjectiveStates != null) {
+                for (Map.Entry<Integer, Map<String, TeamObjectiveState>> byTeam : teamObjectiveStates.entrySet()) {
+                    Integer teamIdx = byTeam.getKey();
+                    if (teamIdx == null || byTeam.getValue() == null) continue;
+
+                    Map<Integer, Map<ObjectiveSlot, TeamObjectiveState>> phaseMap = new HashMap<>();
+                    for (Map.Entry<String, TeamObjectiveState> e : byTeam.getValue().entrySet()) {
+                        if (e.getKey() == null || e.getValue() == null) continue;
+
+                        KeyParts kp = KeyParts.parse(e.getKey());
+                        phaseMap
+                                .computeIfAbsent(kp.phase, __ -> new HashMap<>())
+                                .put(kp.slot, e.getValue());
+                    }
+
+                    s.teamObjectiveStates.put(teamIdx, phaseMap);
+                }
+            }
+
+            return s;
+        }
+
+        private static final class KeyParts {
+            final int phase;
+            final ObjectiveSlot slot;
+
+            private KeyParts(int phase, ObjectiveSlot slot) {
+                this.phase = phase;
+                this.slot = slot;
+            }
+
+            static KeyParts parse(String key) throws IOException {
+                String[] parts = key.split(":", 2);
+                if (parts.length != 2) {
+                    throw new IOException("Invalid objective key (expected phase:SLOT): " + key);
+                }
+                int phase;
+                try {
+                    phase = Integer.parseInt(parts[0]);
+                } catch (NumberFormatException e) {
+                    throw new IOException("Invalid objective key phase: " + key, e);
+                }
+                ObjectiveSlot slot;
+                try {
+                    slot = ObjectiveSlot.valueOf(parts[1]);
+                } catch (IllegalArgumentException e) {
+                    throw new IOException("Invalid objective key slot: " + key, e);
+                }
+                return new KeyParts(phase, slot);
+            }
+        }
+    }
+
 }

@@ -60,14 +60,6 @@ public final class CursedMessages {
     public static Component status(GameState state, String teamText) {
         String runId = (state.runId == null) ? "none" : state.runId.toString();
 
-        String objectiveBlock = "";
-        if (state.objectiveDefinitions == null || state.objectiveDefinitions.isEmpty()) {
-            objectiveBlock = "\n- objectives: none";
-        } else {
-            objectiveBlock = "\n- objectives: present";
-        }
-
-
         String msg =
                 "CURSED status\n" +
                         "- lifecycle: " + state.lifecycleState + "\n" +
@@ -77,7 +69,6 @@ public final class CursedMessages {
                         "- teamsEnabled: " + state.teamsEnabled + "\n" +
                         "- teamCount: " + state.teamCount + "\n" +
                         "- team: " + teamText + "\n" +
-                        objectiveBlock +
                         "- schema: " + state.saveSchemaVersion;
 
         return Component.literal(msg);
