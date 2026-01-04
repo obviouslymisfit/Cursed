@@ -65,16 +65,26 @@ If a conflict is detected:
 
 ---
 
-## 📍 CURRENT PROJECT STATE
+## 📦 PROJECT IDENTITY (STATIC)
 
 - **Project:** CURSED
 - **Loader:** Fabric
 - **Minecraft:** 1.21.10
 - **Scope:** Server-only
-- **Active truth branch:** `feature/m1-runtime-engine`
-- **Current milestone:** M1 — Runtime Engine Structure
 
 ---
+
+## 📍 PROJECT STATE (PER CHAT — REQUIRED)
+
+The following information is **NOT static** and must be explicitly declared
+at the start of every new ChatGPT session:
+
+- Active truth branch
+- Active milestone
+
+If this information is missing, outdated, or ambiguous,
+the assistant must STOP and request clarification before proceeding.
+
 
 ## 🧭 HOW TO START A NEW CHAT (MANDATORY)
 
