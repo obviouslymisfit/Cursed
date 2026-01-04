@@ -91,9 +91,9 @@ the assistant must STOP and request clarification before proceeding.
 When starting a new ChatGPT session for this project:
 
 1. Paste this entire `ANCHOR.md`
-2. Provide:
-    - Link to GitHub repo **or**
-    - ZIP snapshot of current repo state
+2. Provide **one** of the following:
+    - Link to GitHub repo (discussion / planning)
+    - ZIP snapshot of current repo state (required for code work)
 3. State:
     - Current milestone
     - Active truth branch
