@@ -4,6 +4,15 @@ This document defines how the CURSED project is anchored across ChatGPT sessions
 It exists to prevent drift, hallucination, or ambiguity about scope, authority, and current state.
 
 ---
+## 📦 PROJECT IDENTITY (LOCKED)
+
+- **Repository:** https://github.com/obviouslymisfit/Cursed
+- **Mod name:** CURSED
+- **Loader:** Fabric
+- **Minecraft:** 1.21.10
+- **Scope:** Server-only
+
+This repository link is authoritative and does not change.
 
 ## 🧱 ABSOLUTE AUTHORITY RULES
 
