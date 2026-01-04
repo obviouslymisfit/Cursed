@@ -74,7 +74,16 @@ public final class CursedMessages {
         return Component.literal(msg);
     }
 
+    public static Component debugDisabled() {
+        return Component.literal("CURSED debug is DISABLED. Enable it in config/cursed.debug.json and run /curse debug reload.");
+    }
 
+    public static Component debugStatus(boolean enabled) {
+        return Component.literal("CURSED debug is " + (enabled ? "ENABLED" : "DISABLED") + " (config/cursed.debug.json)");
+    }
 
+    public static Component debugReloaded(boolean enabled) {
+        return Component.literal("CURSED debug reloaded: " + (enabled ? "ENABLED" : "DISABLED") + " (config/cursed.debug.json)");
+    }
 
 }

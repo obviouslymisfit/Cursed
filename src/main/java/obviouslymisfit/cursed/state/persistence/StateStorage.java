@@ -6,9 +6,21 @@ import net.minecraft.util.datafix.DataFixTypes;
 import obviouslymisfit.cursed.state.GameState;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Optional;
 
 public final class StateStorage {
+
+    private static void initializeRuntimeObjectives(GameState state) {
+        // Clear any existing data
+        state.objectiveDefinitions.clear();
+        state.teamObjectiveStates.clear();
+
+        // Prepare empty per-team maps
+        for (int teamIdx = 0; teamIdx < state.teamCount; teamIdx++) {
+            state.teamObjectiveStates.put(teamIdx, new HashMap<>());
+        }
+    }
 
     private StateStorage() {}
 
