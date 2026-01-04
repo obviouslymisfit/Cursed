@@ -42,19 +42,10 @@ public final class CursedSavedData extends SavedData {
                                 Map<String, Integer> out = new HashMap<>();
                                 d.state.playerTeams.forEach((uuid, teamIdx) -> out.put(uuid.toString(), teamIdx));
                                 return out;
-                            }),
-                    // --- Objective (generated) ---
-                    Codec.INT.optionalFieldOf("objectivePhase", 0).forGetter(d -> d.state.objectivePhase),
-                    Codec.STRING.optionalFieldOf("objectiveType", "").forGetter(d -> d.state.objectiveType == null ? "" : d.state.objectiveType),
-                    Codec.STRING.optionalFieldOf("objectivePoolId", "").forGetter(d -> d.state.objectivePoolId == null ? "" : d.state.objectivePoolId),
-                    Codec.list(Codec.STRING).optionalFieldOf("objectiveItems", java.util.List.of()).forGetter(d -> d.state.objectiveItems),
-                    Codec.INT.optionalFieldOf("objectiveQuantity", 0).forGetter(d -> d.state.objectiveQuantity)
-
-
+                            })
 
             ).apply(instance, (saveSchemaVersion, runIdOpt, lifecycleStateName, phase, episodeNumber,
-                               teamsEnabled, teamCount, playerTeamsStrMap,
-                               objectivePhase, objectiveType, objectivePoolId, objectiveItems, objectiveQuantity) -> {
+                               teamsEnabled, teamCount, teamScoresById) -> {
 
 
                 CursedSavedData data = new CursedSavedData();
@@ -77,21 +68,8 @@ public final class CursedSavedData extends SavedData {
                 s.teamCount = teamCount;
 
                 s.playerTeams.clear();
-                if (playerTeamsStrMap != null) {
-                    playerTeamsStrMap.forEach((uuidStr, teamIdx) -> {
-                        try {
-                            s.playerTeams.put(UUID.fromString(uuidStr), teamIdx);
-                        } catch (Exception ignored) {
-                            // ignore malformed entries
-                        }
-                    });
-                }
-
-                s.objectivePhase = objectivePhase;
-                s.objectiveType = (objectiveType == null || objectiveType.isEmpty()) ? null : objectiveType;
-                s.objectivePoolId = (objectivePoolId == null || objectivePoolId.isEmpty()) ? null : objectivePoolId;
-                s.objectiveItems = java.util.List.copyOf(objectiveItems == null ? java.util.List.of() : objectiveItems);
-                s.objectiveQuantity = objectiveQuantity;
+                // M1: player team assignments are not persisted via this SavedData codec.
+                // (RunState persistence owns runtime state; teams mapping is handled elsewhere.)
 
                 data.state = s;
                 return data;

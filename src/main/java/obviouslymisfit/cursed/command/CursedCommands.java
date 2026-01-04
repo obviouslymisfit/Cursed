@@ -110,7 +110,6 @@ public final class CursedCommands {
                             state.lifecycleState = RunLifecycleState.IDLE;
                             state.phase = 0;
                             state.episodeNumber = 0;
-                            state.clearObjective();
 
                             StateStorage.save(server, state);
 

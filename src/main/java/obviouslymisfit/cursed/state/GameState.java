@@ -3,8 +3,10 @@ package obviouslymisfit.cursed.state;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
 
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveDefinition;
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveSlot;
+import obviouslymisfit.cursed.objectives.runtime.TeamObjectiveState;
 
 
 /**
@@ -35,20 +37,28 @@ public final class GameState {
      */
     public Map<UUID, Integer> playerTeams = new HashMap<>();
 
-    // Generated objective (persisted)
-    public int objectivePhase = 0;
-    public String objectiveType = null;   // "PRIMARY"
-    public String objectivePoolId = null; // e.g. "overworld_common"
-    public List<String> objectiveItems = List.of();
-    public int objectiveQuantity = 0;
+    // --- Runtime Objectives (Milestone 1) ---
+    /**
+     * Fully resolved objective definitions for the entire run.
+     *
+     * Keyed by:
+     *  - phase (1..5)
+     *  - slotKey (PRIMARY, SECONDARY_1..N, TASK_1..M)
+     *
+     * Structure only in M1: generation/population happens in later steps.
+     */
+    public Map<Integer, Map<ObjectiveSlot, ObjectiveDefinition>> objectiveDefinitions = new HashMap<>();
 
-    public void clearObjective() {
-        objectivePhase = 0;
-        objectiveType = null;
-        objectivePoolId = null;
-        objectiveItems = List.of();
-        objectiveQuantity = 0;
-    }
+    /**
+     * Per-team state for every objective instance.
+     *
+     * Keyed by:
+     *  - teamIndex (0..teamCount-1)  (M1 keeps team identity minimal)
+     *  - phase
+     *  - slotKey
+     */
+    public Map<Integer, Map<Integer, Map<ObjectiveSlot, TeamObjectiveState>>> teamObjectiveStates = new HashMap<>();
+
 
 
     public GameState() {}
