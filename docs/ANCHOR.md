@@ -1,107 +1,155 @@
-# 🔒 CURSED — AUTHORITATIVE CHAT ANCHOR
+# CURSED — CHAT ANCHOR FILE
+## Authoritative Context Bootstrap for New Chats
 
-This document defines how the CURSED project is anchored across ChatGPT sessions.
-It exists to prevent drift, hallucination, or ambiguity about scope, authority, and current state.
+This file exists to guarantee **continuity, correctness, and zero hallucination** when starting a new chat related to the CURSED project.
 
----
-## 📦 PROJECT IDENTITY (LOCKED)
-
-- **Repository:** https://github.com/obviouslymisfit/Cursed
-- **Mod name:** CURSED
-- **Loader:** Fabric
-- **Minecraft:** 1.21.10
-- **Scope:** Server-only
-
-This repository link is authoritative and does not change.
-
-## 🧱 ABSOLUTE AUTHORITY RULES
-
-### 1. Repo / ZIP Truth Rule
-If something is not present in the uploaded ZIP or GitHub repository state, it does not exist.
-
-- No invented methods
-- No inferred fields
-- No assumptions based on memory
-
-Implementation reality always wins over recollection.
+Any new chat **must be initialized by pasting this file verbatim** before discussion or implementation begins.
 
 ---
 
-### 2. File-Anchor Rule (MANDATORY)
-All discussion and work must be anchored to explicitly provided files.
+## 📦 PROJECT IDENTITY (LOCKED & SINGLE SOURCE OF TRUTH)
 
-- If a file is referenced, it must be uploaded or linked
-- If a file is modified, only the explicitly requested changes are allowed
-- For comment-only passes:
-    - ZERO code changes
-    - No formatting changes
-    - No reordered imports
-    - Only added comments and optional blank lines
+- **Project name:** CURSED
+- **Type:** Server-side Fabric mod (Minecraft 1.21.x)
+- **Client mods:** None
+- **Resource packs:** None
+- **UI:** Vanilla only (scoreboard, chat, titles, commands)
+- **Command root:** `/curse` (LOCKED — do not use `/cursed`)
+- **Repository:** Single authoritative GitHub repository
+- **ZIP uploads:** Exact snapshots of repository state at a point in time
 
----
-
-### 3. Specification Authority Hierarchy
-Conflicts are resolved using the following order (highest → lowest):
-
-1. **Repository / ZIP state** (implementation truth)
-2. **Overall Design Spec** (`docs/spec/CURSED-SPEC-v3.md`)
-3. **Active Milestone Spec** (e.g. `docs/spec/M1.md`)
-4. **Git Workflow Rules** (`docs/workflow/git-workflow.md`)
-
-If a conflict is detected:
-→ STOP  
-→ DISCUSS  
-→ DO NOT silently “fix” anything
+There is exactly **one CURSED project**.  
+No forks, variants, or reinterpretations exist unless explicitly approved.
 
 ---
 
-### 4. Mode Discipline
-- Discussion mode by default
-- No code unless explicitly requested
-- One file at a time
-- Compile between steps
-- No speculative refactors
-- No design changes unless explicitly approved
+## 🧭 AUTHORITY HIERARCHY (MANDATORY)
+
+When answering questions, giving guidance, or proposing changes, the assistant must respect the following hierarchy **in strict order**:
+
+1. **Repository state / uploaded ZIP**  
+   The actual code and files currently provided are the highest authority.
+
+2. **Authoritative Design Specification**  
+   File: `CURSED-SPEC.md`  
+   This document defines the **conceptual design, terminology, intent, and philosophy** of the game.
+
+3. **Milestone Specifications (M1–M12)**  
+   These documents define **implementation slicing and order**, not design intent.
+
+4. **This anchor file**
+
+### Conflict rule
+- If code and spec disagree → **code is wrong**
+- If milestone and design spec disagree → **milestone explains implementation, spec explains intent**
+- No document may silently override a higher authority
 
 ---
 
-## 📦 PROJECT IDENTITY (STATIC)
+## 🚫 NO INFERENCE / NO MEMORY RULE (CRITICAL)
 
-- **Project:** CURSED
-- **Loader:** Fabric
-- **Minecraft:** 1.21.10
-- **Scope:** Server-only
+The assistant must **never** infer, extrapolate, or “fill in gaps”.
+
+- Do **not** rely on prior chats, summaries, or memory
+- Do **not** assume missing mechanics
+- Do **not** invent systems, behaviors, or rules
+
+If something is unclear:
+1. **Scan the provided repository / ZIP first**
+2. **Scan the design spec**
+3. **Scan milestone documents**
+4. Only then, ask for clarification
+
+“I don’t know” is acceptable **only after files are reviewed**.
+
+---
+
+## 🔒 MILESTONE LOCK RULE (MANDATORY)
+
+Approved milestone documents (M1–M12) are **LOCKED**.
+
+- They define **what must exist**
+- They are **not prompts or suggestions**
+- They are **not to be reinterpreted**
+
+The assistant must **not**:
+- re-scope milestones
+- re-order milestones
+- question design decisions already locked in milestones
+- introduce alternative approaches without explicit user approval
+
+Any change requires **explicit confirmation** from the user.
 
 ---
 
-## 📍 PROJECT STATE (PER CHAT — REQUIRED)
+## 🧠 MODE DISCIPLINE
 
-The following information is **NOT static** and must be explicitly declared
-at the start of every new ChatGPT session:
+- **Default mode:** Discussion / analysis
+- **Code is NEVER written unless explicitly requested**
+- **No mixed-mode responses**
+    - (e.g. discussion + code in the same reply is forbidden)
 
-- Active truth branch
-- Active milestone
-
-If this information is missing, outdated, or ambiguous,
-the assistant must STOP and request clarification before proceeding.
-
-
-## 🧭 HOW TO START A NEW CHAT (MANDATORY)
-
-When starting a new ChatGPT session for this project:
-
-1. Paste this entire `ANCHOR.md`
-2. Provide **one** of the following:
-    - Link to GitHub repo (discussion / planning)
-    - ZIP snapshot of current repo state (required for code work)
-3. State:
-    - Current milestone
-    - Active truth branch
-4. Specify mode:
-    - Discussion
-    - Comments-only
-    - Code (file + intent)
-
-Nothing proceeds until anchoring is confirmed.
+If unsure which mode is active, **ask before proceeding**.
 
 ---
+
+## 📁 FILE & CODE HANDLING RULES
+
+- If a file is uploaded and the request is to:
+    - “add comments”
+    - “review”
+    - “verify”
+
+  → **Do not change code logic**
+  → **Do not rename**
+  → **Do not refactor**
+  → **Only do what is explicitly requested**
+
+- If code is written:
+    - it must include **clear, explanatory comments at creation time**
+    - “we’ll comment later” is invalid
+
+---
+
+## 🚀 HOW TO START A NEW CHAT (MANDATORY PROCEDURE)
+
+To start a new CURSED-related chat:
+
+1. Paste this `ANCHOR.md`
+2. Upload the **current repository ZIP** or confirm no changes since last ZIP
+3. State the intended mode:
+    - discussion
+    - review
+    - implementation
+4. State the target milestone (if applicable)
+
+Only after this procedure may work begin.
+
+---
+
+## 🧱 DESIGN INTEGRITY RULE
+
+If at any point:
+- implementation becomes unclear
+- behavior seems contradictory
+- or assumptions conflict
+
+→ **Stop coding**
+→ **Update the design spec first**
+→ **Then proceed**
+
+This project is **spec-first by design**.
+
+---
+
+## ✅ FINAL REMINDER
+
+CURSED is:
+- explicit in goals
+- opaque in danger
+- data-driven in content
+- strict in lifecycle
+- hostile to inference
+- intolerant of silent changes
+
+If something is not in the files, **it does not exist**.
