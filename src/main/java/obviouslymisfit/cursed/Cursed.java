@@ -11,10 +11,13 @@ import obviouslymisfit.cursed.config.DebugConfig;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.server.level.ServerPlayer;
 
 import obviouslymisfit.cursed.state.persistence.StateStorage;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
+import obviouslymisfit.cursed.team.TeamScoreboardSync;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
@@ -44,6 +47,25 @@ public class Cursed implements ModInitializer {
 		}
 
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			GameState state = StateStorage.get(server);
+
+			// First, ensure all CURSED teams exist (safe to call repeatedly).
+			TeamScoreboardSync.sync(server, state);
+
+			// Then, explicitly place the joining player into their team if assigned.
+			ServerPlayer player = handler.player;
+			Integer teamIdx = state.playerTeams.get(player.getUUID());
+
+			if (teamIdx != null && teamIdx >= 1 && teamIdx <= state.teamCount) {
+				var scoreboard = server.getScoreboard();
+				var team = scoreboard.getPlayerTeam("curse_team_" + teamIdx);
+				if (team != null) {
+					scoreboard.addPlayerToTeam(player.getScoreboardName(), team);
+				}
+			}
+		});
+
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CursedCommands.register(dispatcher));
 
 
@@ -72,6 +94,11 @@ public class Cursed implements ModInitializer {
 			StateStorage.save(server, state);
 			LOGGER.warn("CURSED: forced PAUSED on server restart safety");
 		}
+
+		// M2: scoreboard teams are a projection of GameState.
+		// Re-apply them on server start so team colors persist across restarts.
+		TeamScoreboardSync.sync(server, StateStorage.get(server));
+
 	}
 
 

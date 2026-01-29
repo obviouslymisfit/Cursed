@@ -1,6 +1,7 @@
 package obviouslymisfit.cursed.message;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 import obviouslymisfit.cursed.state.GameState;
 
@@ -56,6 +57,39 @@ public final class CursedMessages {
                         "All team assignments cleared"
         );
     }
+
+    public static Component teamsNotConfigured() {
+        return Component.literal(
+                "Teams are not configured.\n" +
+                        "Run /curse teams set <count> first."
+        );
+    }
+
+    public static Component invalidTeamIndex(int teamIdx, int teamCount) {
+        return Component.literal(
+                "Invalid team index: " + teamIdx + "\n" +
+                        "Valid range is 1.." + teamCount
+        );
+    }
+
+    public static Component teamAssigned(ServerPlayer player, int teamIdx) {
+        return Component.literal(
+                "Assigned " + player.getName().getString() + " to team " + teamIdx
+        );
+    }
+
+    public static Component teamAlreadyUnassigned(ServerPlayer player) {
+        return Component.literal(
+                player.getName().getString() + " is already unassigned"
+        );
+    }
+
+    public static Component teamUnassigned(ServerPlayer player) {
+        return Component.literal(
+                "Unassigned " + player.getName().getString() + " from their team"
+        );
+    }
+
 
     public static Component status(GameState state, String teamText) {
         String runId = (state.runId == null) ? "none" : state.runId.toString();

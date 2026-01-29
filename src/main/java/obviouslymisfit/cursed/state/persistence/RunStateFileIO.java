@@ -4,6 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+import java.time.Instant;
+
+import com.mojang.util.InstantTypeAdapter;
 import net.minecraft.server.MinecraftServer;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
@@ -43,7 +50,13 @@ public final class RunStateFileIO {
     private static final Gson GSON = new GsonBuilder()
             .disableHtmlEscaping()
             .setPrettyPrinting()
+
+            // Gson cannot reliably reflect into java.time.Instant on newer Java runtimes.
+            // We serialize Instants as ISO-8601 strings (e.g. "2026-01-29T14:15:22.123Z").
+            .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+
             .create();
+
 
     private RunStateFileIO() {}
 
@@ -391,5 +404,34 @@ public final class RunStateFileIO {
             }
         }
     }
+
+    /**
+     * Gson adapter for java.time.Instant.
+     *
+     * We persist Instants as ISO-8601 strings via Instant#toString() and restore via Instant#parse.
+     * This avoids Gson reflection issues with java.time types on newer Java runtimes.
+     */
+    private static final class InstantTypeAdapter extends TypeAdapter<Instant> {
+
+        @Override
+        public void write(JsonWriter out, Instant value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+                return;
+            }
+            out.value(value.toString());
+        }
+
+        @Override
+        public Instant read(JsonReader in) throws IOException {
+            if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+                in.nextNull();
+                return null;
+            }
+            String raw = in.nextString();
+            return Instant.parse(raw);
+        }
+    }
+
 
 }

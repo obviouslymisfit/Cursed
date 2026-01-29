@@ -4,27 +4,26 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-
+import obviouslymisfit.cursed.config.ConfigManager;
+import obviouslymisfit.cursed.message.CursedMessages;
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveDefinition;
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveSlot;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
-import obviouslymisfit.cursed.message.CursedMessages;
-import obviouslymisfit.cursed.config.ConfigManager;
-import obviouslymisfit.cursed.objectives.runtime.ObjectiveDefinition;
-import obviouslymisfit.cursed.objectives.runtime.ObjectiveSlot;
+import obviouslymisfit.cursed.team.TeamScoreboardSync;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Map;
+
+import java.util.*;
 
 public final class CursedCommands {
 
-    private CursedCommands() {}
+    private CursedCommands() {
+    }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
@@ -127,30 +126,88 @@ public final class CursedCommands {
 
 
         // /curse teams set <count>
+        // /curse teams assign <player> <team>
+        // /curse teams unassign <player>
         root.then(Commands.literal("teams")
-                .then(Commands.literal("set")
-                        .then(Commands.argument("count", IntegerArgumentType.integer(2, 8))
+                        // /curse teams set <count>
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("count", IntegerArgumentType.integer(2, 8))
+                                        .executes(ctx -> {
+                                            CommandSourceStack src = ctx.getSource();
+                                            MinecraftServer server = src.getServer();
+
+                                            int count = IntegerArgumentType.getInteger(ctx, "count");
+
+                                            GameState state = StateStorage.get(server);
+                                            state.teamsEnabled = true;
+                                            state.teamCount = count;
+                                            state.playerTeams.clear();
+
+                                            StateStorage.save(server, state);
+                                            TeamScoreboardSync.sync(server, state);
+
+                                            src.sendSuccess(() -> CursedMessages.teamsConfigured(count), true);
+                                            return 1;
+                                        })))
+
+                        // /curse teams assign <player> <team>
+                        .then(Commands.literal("assign")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("team", IntegerArgumentType.integer(1, 8))
+                                                .executes(ctx -> {
+                                                    CommandSourceStack src = ctx.getSource();
+                                                    MinecraftServer server = src.getServer();
+
+                                                    GameState state = StateStorage.get(server);
+                                                    if (!state.teamsEnabled) {
+                                                        src.sendFailure(CursedMessages.teamsNotConfigured());
+                                                        return 0;
+                                                    }
+
+                                                    ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+                                                    int teamIdx = IntegerArgumentType.getInteger(ctx, "team");
+
+                                                    if (teamIdx < 1 || teamIdx > state.teamCount) {
+                                                        src.sendFailure(CursedMessages.invalidTeamIndex(teamIdx, state.teamCount));
+                                                        return 0;
+                                                    }
+
+                                                    state.playerTeams.put(player.getUUID(), teamIdx);
+                                                    StateStorage.save(server, state);
+                                                    TeamScoreboardSync.sync(server, state);
+
+                                                    src.sendSuccess(() -> CursedMessages.teamAssigned(player, teamIdx), true);
+                                                    return 1;
+                                                }))))
+
+                // /curse teams unassign <player>
+                .then(Commands.literal("unassign")
+                        .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> {
                                     CommandSourceStack src = ctx.getSource();
                                     MinecraftServer server = src.getServer();
 
-                                    int count = IntegerArgumentType.getInteger(ctx, "count");
-
                                     GameState state = StateStorage.get(server);
-                                    state.teamsEnabled = true;
-                                    state.teamCount = count;
-                                    state.playerTeams.clear();
+                                    if (!state.teamsEnabled) {
+                                        src.sendFailure(CursedMessages.teamsNotConfigured());
+                                        return 0;
+                                    }
+
+                                    ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+                                    boolean removed = (state.playerTeams.remove(player.getUUID()) != null);
 
                                     StateStorage.save(server, state);
+                                    TeamScoreboardSync.sync(server, state);
 
-                                    src.sendSuccess(
-                                            () -> CursedMessages.teamsConfigured(count),
-                                            true
-                                    );
+                                    if (!removed) {
+                                        src.sendSuccess(() -> CursedMessages.teamAlreadyUnassigned(player), false);
+                                        return 1;
+                                    }
 
+                                    src.sendSuccess(() -> CursedMessages.teamUnassigned(player), true);
                                     return 1;
                                 })))
-        );
+                );
 
 
         // /curse status
@@ -230,6 +287,14 @@ public final class CursedCommands {
                                 )
                         )
                 )
+
+                // /curse debug teams
+                .then(Commands.literal("teams")
+                        .executes(ctx -> {
+                            return executeDebugTeams(ctx.getSource());
+                        })
+                )
+
         );
 
 
@@ -238,7 +303,7 @@ public final class CursedCommands {
 
     /**
      * Debug-gated introspection command that prints resolved ObjectiveDefinitions.
-     *
+     * <p>
      * Intentionally:
      * - blocked (with a clear message) when debug is disabled
      * - stable ordering for repeatable output
@@ -337,5 +402,76 @@ public final class CursedCommands {
             return 999;
         }
     }
+
+    /**
+     * Debug-gated inspection of team state vs scoreboard state.
+     *
+     * Prints:
+     * - GameState team assignment for the executing player (UUID -> teamIdx)
+     * - Player scoreboard name key used for membership
+     * - Current scoreboard team for that name (if any)
+     * - All existing CURSED scoreboard teams and their configured colors
+     *
+     * Intentionally read-only: does not mutate state or scoreboard.
+     */
+    private static int executeDebugTeams(CommandSourceStack src) {
+        if (!ConfigManager.debug().enabled) {
+            src.sendFailure(CursedMessages.debugDisabled());
+            return 0;
+        }
+
+        MinecraftServer server = src.getServer();
+        GameState state = StateStorage.get(server);
+
+        var scoreboard = server.getScoreboard();
+
+        // Report basic state first.
+        src.sendSuccess(() -> Component.literal(
+                "CURSED debug teams\n" +
+                        "- teamsEnabled: " + state.teamsEnabled + "\n" +
+                        "- teamCount: " + state.teamCount + "\n" +
+                        "- assignments: " + state.playerTeams.size()
+        ), false);
+
+        if (!(src.getEntity() instanceof ServerPlayer player)) {
+            src.sendSuccess(() -> Component.literal("Player context: n/a (not executed by a player)"), false);
+            return 1;
+        }
+
+        UUID uuid = player.getUUID();
+        Integer teamIdx = state.playerTeams.get(uuid);
+
+        String scoreboardName = player.getScoreboardName();
+        var scoreboardTeam = scoreboard.getPlayersTeam(scoreboardName);
+
+        src.sendSuccess(() -> Component.literal(
+                "Player context\n" +
+                        "- name: " + player.getName().getString() + "\n" +
+                        "- uuid: " + uuid + "\n" +
+                        "- state teamIdx: " + (teamIdx == null ? "unassigned" : teamIdx) + "\n" +
+                        "- scoreboardName key: " + scoreboardName + "\n" +
+                        "- scoreboard team: " + (scoreboardTeam == null ? "none" : scoreboardTeam.getName()) + "\n" +
+                        "- scoreboard color: " + (scoreboardTeam == null ? "n/a" : String.valueOf(scoreboardTeam.getColor()))
+        ), false);
+
+        // List CURSED teams present in the scoreboard.
+        int cursedTeams = 0;
+        for (var team : scoreboard.getPlayerTeams()) {
+            if (team == null) continue;
+            String id = team.getName();
+            if (id != null && id.startsWith("curse_team_")) {
+                cursedTeams++;
+                src.sendSuccess(() -> Component.literal(
+                        "- " + id + " color=" + String.valueOf(team.getColor())
+                ), false);
+            }
+        }
+
+        final int cursedTeamsFinal = cursedTeams;
+        src.sendSuccess(() -> Component.literal("CURSED scoreboard teams present: " + cursedTeamsFinal), false);
+
+        return 1;
+    }
+
 
 }
