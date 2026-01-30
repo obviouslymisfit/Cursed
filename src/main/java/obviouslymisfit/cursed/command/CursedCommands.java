@@ -12,6 +12,7 @@ import obviouslymisfit.cursed.config.ConfigManager;
 import obviouslymisfit.cursed.message.CursedMessages;
 import obviouslymisfit.cursed.objectives.runtime.ObjectiveDefinition;
 import obviouslymisfit.cursed.objectives.runtime.ObjectiveSlot;
+import obviouslymisfit.cursed.objectives.runtime.TeamObjectiveState;
 import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
@@ -50,6 +51,28 @@ public final class CursedCommands {
                     state.episodeNumber = 1;
 
                     ObjectiveRuntimeGenerator.generate(server, state);
+
+                    // M2 Step 3: initialize per-team objective state for every generated definition.
+                    state.teamObjectiveStates.clear();
+
+                    int teamCount = state.teamsEnabled ? state.teamCount : 0;
+
+                    for (int teamIdx = 1; teamIdx <= teamCount; teamIdx++) {
+                        Map<Integer, Map<ObjectiveSlot, TeamObjectiveState>> perPhase = new HashMap<>();
+
+                        for (Map.Entry<Integer, Map<ObjectiveSlot, ObjectiveDefinition>> phaseEntry : state.objectiveDefinitions.entrySet()) {
+                            int phaseKey = phaseEntry.getKey();
+
+                            Map<ObjectiveSlot, TeamObjectiveState> perSlot = new HashMap<>();
+                            for (ObjectiveSlot slot : phaseEntry.getValue().keySet()) {
+                                perSlot.put(slot, new TeamObjectiveState());
+                            }
+
+                            perPhase.put(phaseKey, perSlot);
+                        }
+
+                        state.teamObjectiveStates.put(teamIdx, perPhase);
+                    }
 
                     StateStorage.save(server, state);
 
@@ -118,6 +141,9 @@ public final class CursedCommands {
                             state.lifecycleState = RunLifecycleState.IDLE;
                             state.phase = 0;
                             state.episodeNumber = 0;
+                            state.runSeed = 0L;
+                            state.objectiveDefinitions.clear();
+                            state.teamObjectiveStates.clear();
 
                             StateStorage.save(server, state);
 
@@ -472,6 +498,43 @@ public final class CursedCommands {
 
         final int cursedTeamsFinal = cursedTeams;
         src.sendSuccess(() -> Component.literal("CURSED scoreboard teams present: " + cursedTeamsFinal), false);
+
+        // M2 Step 3 verification: teamObjectiveStates should mirror objectiveDefinitions for each team.
+        int defsTotal = 0;
+        for (var perPhase : state.objectiveDefinitions.values()) {
+            if (perPhase != null) defsTotal += perPhase.size();
+        }
+
+        final int defsTotalFinal = defsTotal;
+        final int teamsTotalFinal = state.teamObjectiveStates.size();
+
+        src.sendSuccess(() -> Component.literal(
+                "Objective state summary\n" +
+                        "- objectiveDefinitions total: " + defsTotalFinal + "\n" +
+                        "- teamObjectiveStates teams: " + teamsTotalFinal
+        ), false);
+
+
+        for (var teamEntry : state.teamObjectiveStates.entrySet()) {
+            Integer tIdx = teamEntry.getKey();
+            var perPhase = teamEntry.getValue();
+
+            int phasesCount = (perPhase == null) ? 0 : perPhase.size();
+
+            int slotsTotal = 0;
+            if (perPhase != null) {
+                for (var perSlot : perPhase.values()) {
+                    if (perSlot != null) slotsTotal += perSlot.size();
+                }
+            }
+
+            final int phasesCountFinal = phasesCount;
+            final int slotsTotalFinal = slotsTotal;
+
+            src.sendSuccess(() -> Component.literal(
+                    "- team " + tIdx + ": phases=" + phasesCountFinal + ", slots=" + slotsTotalFinal
+            ), false);
+        }
 
         return 1;
     }
