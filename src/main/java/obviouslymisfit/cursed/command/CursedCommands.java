@@ -16,7 +16,7 @@ import obviouslymisfit.cursed.state.GameState;
 import obviouslymisfit.cursed.state.RunLifecycleState;
 import obviouslymisfit.cursed.state.persistence.StateStorage;
 import obviouslymisfit.cursed.team.TeamScoreboardSync;
-
+import obviouslymisfit.cursed.objectives.runtime.ObjectiveRuntimeGenerator;
 
 import java.util.*;
 
@@ -44,9 +44,12 @@ public final class CursedCommands {
                     }
 
                     state.runId = UUID.randomUUID();
+                    state.runSeed = new Random().nextLong();
                     state.lifecycleState = RunLifecycleState.RUNNING;
                     state.phase = 1;
                     state.episodeNumber = 1;
+
+                    ObjectiveRuntimeGenerator.generate(server, state);
 
                     StateStorage.save(server, state);
 

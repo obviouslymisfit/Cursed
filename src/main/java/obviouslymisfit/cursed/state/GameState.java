@@ -24,6 +24,17 @@ public final class GameState {
 
     public RunLifecycleState lifecycleState = RunLifecycleState.IDLE;
 
+    /**
+     * Seed for any run-time random choices made during run initialization (e.g., objective generation).
+     *
+     * Rules (M2):
+     * - Set exactly once when a new run starts (IDLE -> RUNNING).
+     * - Persisted in run_state.json so the run is reproducible and restart-safe.
+     * - A value of 0 means "unset/legacy" and should be replaced on new run start.
+     */
+    public long runSeed = 0L;
+
+
     public int phase = 0;          // 0 when IDLE, 1-5 when run exists
     public int episodeNumber = 0;  // 0 when IDLE
 

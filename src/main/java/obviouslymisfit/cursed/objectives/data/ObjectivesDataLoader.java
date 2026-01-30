@@ -49,6 +49,16 @@ public final class ObjectivesDataLoader {
 
     private static final Gson GSON = new GsonBuilder().create();
 
+    // M2: validated objective data is kept in memory after loadAndValidate()
+    // so runtime generation can consume it without re-reading JSON files.
+    private static Map<String, ItemPoolFile> POOLS_BY_ID = Map.of();
+    private static Map<String, Path> CONSTRAINTS_BY_ID = Map.of();
+    private static Map<String, ObjectiveTemplateFile> TEMPLATES_BY_ID = Map.of();
+    // phase -> (category|type) -> rule
+    private static Map<Integer, Map<String, QuantityRuleFile>> QUANTITY_RULES_BY_PHASE = Map.of();
+    // phase -> generator rules
+    private static Map<Integer, GeneratorRuleFile> GENERATOR_RULES_BY_PHASE = Map.of();
+
     private static Map<String, ItemPoolFile> loadAndValidateItemPools() {
 
         Cursed.LOGGER.info("CURSED: loading item pools");
@@ -175,7 +185,7 @@ public final class ObjectivesDataLoader {
         return byId;
     }
 
-    private static Set<String> loadAndValidateObjectiveTemplates(
+    private static Map<String, ObjectiveTemplateFile> loadAndValidateObjectiveTemplates(
             Map<String, ItemPoolFile> poolsById,
             Map<String, Path> constraintsById
     ) {
@@ -295,10 +305,10 @@ public final class ObjectivesDataLoader {
         }
 
         Cursed.LOGGER.info("CURSED: loaded {} objective templates", templatesById.size());
-        return templatesById.keySet();
+        return templatesById;
     }
 
-    private static void loadAndValidateQuantityRules() {
+    private static Map<Integer, Map<String, QuantityRuleFile>> loadAndValidateQuantityRules() {
         Cursed.LOGGER.info("CURSED: loading quantity rules");
 
         URL rulesUrl = ObjectivesDataLoader.class.getClassLoader().getResource(ROOT_PATH + "/quantity_rules");
@@ -426,9 +436,11 @@ public final class ObjectivesDataLoader {
         }
 
         Cursed.LOGGER.info("CURSED: loaded quantity rules for phases 1-5 (coverage OK)");
+
+        return byPhase;
     }
 
-    private static void loadAndValidateGeneratorRules(Set<String> templateIds) {
+    private static Map<Integer, GeneratorRuleFile> loadAndValidateGeneratorRules(Set<String> templateIds) {
         Cursed.LOGGER.info("CURSED: loading generator rules");
 
         URL rulesUrl = ObjectivesDataLoader.class.getClassLoader().getResource(ROOT_PATH + "/generator_rules");
@@ -544,6 +556,8 @@ public final class ObjectivesDataLoader {
         }
 
         Cursed.LOGGER.info("CURSED: loaded generator rules for phases 1-5 (coverage OK)");
+
+        return byPhase;
     }
 
     private static void validateEligibleTemplates(
@@ -613,10 +627,39 @@ public final class ObjectivesDataLoader {
 
         Map<String, ItemPoolFile> poolsById = loadAndValidateItemPools();
         Map<String, Path> constraintsById = indexConstraintsFiles();
-        Set<String> templateIds = loadAndValidateObjectiveTemplates(poolsById, constraintsById);
-        loadAndValidateQuantityRules();
-        loadAndValidateGeneratorRules(templateIds);
+        Map<String, ObjectiveTemplateFile> templatesById = loadAndValidateObjectiveTemplates(poolsById, constraintsById);
+
+        Map<Integer, Map<String, QuantityRuleFile>> qtyRulesByPhase = loadAndValidateQuantityRules();
+        Map<Integer, GeneratorRuleFile> genRulesByPhase = loadAndValidateGeneratorRules(templatesById.keySet());
+
+        // Publish validated data (M2 runtime generation consumes these)
+        POOLS_BY_ID = poolsById;
+        CONSTRAINTS_BY_ID = constraintsById;
+        TEMPLATES_BY_ID = templatesById;
+        QUANTITY_RULES_BY_PHASE = qtyRulesByPhase;
+        GENERATOR_RULES_BY_PHASE = genRulesByPhase;
 
         Cursed.LOGGER.info("CURSED: objectives data folder structure OK");
     }
+
+    public static Map<String, ItemPoolFile> poolsById() {
+        return POOLS_BY_ID;
+    }
+
+    public static Map<String, Path> constraintsById() {
+        return CONSTRAINTS_BY_ID;
+    }
+
+    public static Map<String, ObjectiveTemplateFile> templatesById() {
+        return TEMPLATES_BY_ID;
+    }
+
+    public static Map<Integer, Map<String, QuantityRuleFile>> quantityRulesByPhase() {
+        return QUANTITY_RULES_BY_PHASE;
+    }
+
+    public static Map<Integer, GeneratorRuleFile> generatorRulesByPhase() {
+        return GENERATOR_RULES_BY_PHASE;
+    }
+
 }

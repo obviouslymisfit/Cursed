@@ -18,6 +18,16 @@ public final class ObjectiveDefinition {
     private final int phase;
     private final ObjectiveSlot slotKey;
 
+    /**
+     * Stable, persisted runtime identifier for this generated definition.
+     *
+     * Rules (M2):
+     * - Assigned exactly once at run generation time.
+     * - Must remain stable across restarts (persisted in run_state.json).
+     * - IDs should start at 1. A value of 0 means "unassigned/legacy".
+     */
+    private final int runtimeId;
+
     private final ObjectiveCategory category;
     private final ObjectiveAction action;
 
@@ -34,6 +44,7 @@ public final class ObjectiveDefinition {
     private final List<String> constraintIdsApplied;
 
     public ObjectiveDefinition(
+            int runtimeId,
             int phase,
             ObjectiveSlot slotKey,
             ObjectiveCategory category,
@@ -46,6 +57,41 @@ public final class ObjectiveDefinition {
             String quantityRuleId,
             List<String> constraintIdsApplied
     ) {
+        this.runtimeId = runtimeId;
+
+        this.phase = phase;
+        this.slotKey = Objects.requireNonNull(slotKey, "slotKey");
+        this.category = Objects.requireNonNull(category, "category");
+        this.action = Objects.requireNonNull(action, "action");
+        this.itemId = Objects.requireNonNull(itemId, "itemId");
+        this.quantityRequired = quantityRequired;
+        this.cohesion = cohesion;
+
+        this.templateId = Objects.requireNonNull(templateId, "templateId");
+        this.poolId = Objects.requireNonNull(poolId, "poolId");
+        this.quantityRuleId = Objects.requireNonNull(quantityRuleId, "quantityRuleId");
+
+        if (constraintIdsApplied == null) {
+            this.constraintIdsApplied = Collections.emptyList();
+        } else {
+            this.constraintIdsApplied = Collections.unmodifiableList(new ArrayList<>(constraintIdsApplied));
+        }
+    }
+
+    public ObjectiveDefinition(
+            int phase,
+            ObjectiveSlot slotKey,
+            ObjectiveCategory category,
+            ObjectiveAction action,
+            String itemId,
+            int quantityRequired,
+            Cohesion cohesion,
+            String templateId,
+            String poolId,
+            String quantityRuleId,
+            List<String> constraintIdsApplied
+    ) {
+        this.runtimeId = 0;
         this.phase = phase;
         this.slotKey = Objects.requireNonNull(slotKey, "slotKey");
         this.category = Objects.requireNonNull(category, "category");
@@ -71,6 +117,10 @@ public final class ObjectiveDefinition {
 
     public ObjectiveSlot getSlotKey() {
         return slotKey;
+    }
+
+    public int getRuntimeId() {
+        return runtimeId;
     }
 
     public ObjectiveCategory getCategory() {
